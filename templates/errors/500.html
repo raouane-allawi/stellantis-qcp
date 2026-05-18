@@ -1,0 +1,51 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f9fafb; font-family:'DM Sans',sans-serif;">
+  <div style="text-align:center; padding:2rem;">
+
+    <!-- Logo -->
+    <div style="margin-bottom:2rem;">
+      <img src="/static/img/stellantis_logo.png" alt="Stellantis"
+           style="height:40px; opacity:0.3;" />
+    </div>
+
+    <!-- 500 number -->
+    <div style="font-size:8rem; font-weight:800; color:#e5e7eb; line-height:1; letter-spacing:-4px; margin-bottom:0;">
+      500
+    </div>
+
+    <!-- Icon -->
+    <div style="width:72px; height:72px; background:#fef2f2; border-radius:18px; display:flex; align-items:center; justify-content:center; margin:1rem auto;">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+
+    <div style="font-size:1.5rem; font-weight:700; color:#111827; margin-bottom:0.5rem;">
+      Erreur serveur
+    </div>
+    <div style="font-size:0.9rem; color:#6b7280; margin-bottom:2rem; max-width:400px; margin-left:auto; margin-right:auto; line-height:1.6;">
+      Une erreur interne s'est produite. Notre équipe a été notifiée. Veuillez réessayer dans quelques instants.
+    </div>
+
+    <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
+      <a href="/dashboard/"
+         style="padding:0.75rem 1.5rem; background:#1a2c6b; color:white; border-radius:8px; text-decoration:none; font-size:0.88rem; font-weight:600;"
+         onmouseover="this.style.background='#243580';"
+         onmouseout="this.style.background='#1a2c6b';">
+        🏠 Accueil
+      </a>
+      <a href="javascript:location.reload()"
+         style="padding:0.75rem 1.5rem; background:white; color:#374151; border:1px solid #e5e7eb; border-radius:8px; text-decoration:none; font-size:0.88rem; font-weight:500;"
+         onmouseover="this.style.borderColor='#9ca3af';"
+         onmouseout="this.style.borderColor='#e5e7eb';">
+        ↻ Réessayer
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
