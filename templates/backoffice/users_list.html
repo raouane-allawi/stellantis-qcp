@@ -1,0 +1,219 @@
+{% extends "backoffice/base_backoffice.html" %}
+
+{% block backoffice_content %}
+
+<!-- Page header -->
+<div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1rem;">
+  <div>
+    <div style="font-size:1.15rem; font-weight:700; color:#111827; letter-spacing:-0.2px;">Utilisateurs</div>
+    <div style="font-size:0.73rem; color:#6b7280; margin-top:2px;">Gérez les accès et rôles du personnel QCP</div>
+  </div>
+  <a href="/backoffice/users/create/"
+     style="display:inline-flex; align-items:center; gap:0.3rem; padding:0.45rem 0.9rem; background:#1a2c6b; color:white; border-radius:7px; font-size:0.8rem; font-weight:500; text-decoration:none; transition:background 0.15s;"
+     onmouseover="this.style.background='#243580';"
+     onmouseout="this.style.background='#1a2c6b';">
+    + Ajouter
+  </a>
+</div>
+
+<!-- Stats -->
+<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem; margin-bottom:1rem;">
+
+  {% for stat in [
+    {'label': 'Total', 'value': total, 'icon': 'users', 'bg': '#eef2ff'},
+    {'label': 'Admins', 'value': admins, 'icon': 'shield', 'bg': '#eef2ff'},
+    {'label': 'Superviseurs', 'value': supervisors, 'icon': 'eye', 'bg': '#f0fdf4'},
+    {'label': 'Opérateurs', 'value': operators, 'icon': 'user', 'bg': '#fffbeb'},
+  ] %}
+  <div style="background:white; border:1px solid #e5e7eb; border-radius:9px; padding:0.85rem 1rem; display:flex; align-items:center; gap:0.7rem;">
+    <div style="width:36px; height:36px; border-radius:8px; background:{{ stat.bg }}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a2c6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        {% if stat.icon == 'users' %}
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        {% elif stat.icon == 'shield' %}
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        {% elif stat.icon == 'eye' %}
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        {% else %}
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        {% endif %}
+      </svg>
+    </div>
+    <div>
+      <div style="font-size:1.55rem; font-weight:700; color:#111827; line-height:1; letter-spacing:-0.5px;">{{ stat.value }}</div>
+      <div style="font-size:0.69rem; color:#6b7280; margin-top:2px;">{{ stat.label }}</div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+
+<!-- Table -->
+<div style="background:white; border:1px solid #e5e7eb; border-radius:9px; overflow:hidden;">
+
+  <!-- Toolbar -->
+  <div style="padding:0.75rem 1.1rem; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:0.6rem;">
+    <div style="font-size:0.87rem; font-weight:600; color:#111827;">Liste des utilisateurs</div>
+    <div style="font-size:0.65rem; padding:0.1rem 0.42rem; border-radius:6px; background:#f3f4f6; color:#6b7280; font-weight:600;">
+      {{ total }} utilisateurs
+    </div>
+  </div>
+
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="background:#f9fafb; border-bottom:1px solid #e5e7eb;">
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">Matricule</th>
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">Utilisateur</th>
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">Rôle</th>
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">Zones</th>
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">Statut</th>
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr style="border-bottom:1px solid #f3f4f6;">
+
+        <td style="padding:0.75rem 1.1rem;">
+          <span style="font-family:monospace; font-size:0.75rem; color:#9ca3af; background:#f3f4f6; padding:0.12rem 0.4rem; border-radius:3px;">
+            {{ user.employee_id or user.username }}
+          </span>
+        </td>
+
+        <td style="padding:0.75rem 1.1rem;">
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <div style="width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#1a2c6b,#3b6aff); display:flex; align-items:center; justify-content:center; font-size:0.62rem; font-weight:700; color:white; flex-shrink:0;">
+              {{ (user.first_name[0] if user.first_name else user.username[0])|upper }}{{ (user.last_name[0] if user.last_name else '')|upper }}
+            </div>
+            <div>
+              <div style="font-weight:500; color:#111827; font-size:0.82rem;">{{ user.get_full_name() or user.username }}</div>
+              <div style="font-size:0.7rem; color:#9ca3af;">{{ user.email }}</div>
+            </div>
+          </div>
+        </td>
+
+        <td style="padding:0.75rem 1.1rem;">
+          {% if user.role == 'ADMIN' %}
+          <span style="background:#eff6ff; color:#1d4ed8; padding:0.18rem 0.55rem; border-radius:4px; font-size:0.68rem; font-weight:600;">Administrateur</span>
+          {% elif user.role == 'SUPERVISOR' %}
+          <span style="background:#f0fdf4; color:#16a34a; padding:0.18rem 0.55rem; border-radius:4px; font-size:0.68rem; font-weight:600;">Superviseur</span>
+          {% else %}
+          <span style="background:#fffbeb; color:#d97706; padding:0.18rem 0.55rem; border-radius:4px; font-size:0.68rem; font-weight:600;">Opérateur</span>
+          {% endif %}
+        </td>
+
+        <td style="padding:0.75rem 1.1rem;">
+          <div style="display:flex; gap:0.25rem; flex-wrap:wrap;">
+            {% if user.is_admin %}
+              <span style="padding:0.1rem 0.4rem; border-radius:4px; font-size:0.62rem; font-weight:600; background:#eef2ff; color:#1a2c6b;">Toutes</span>
+            {% else %}
+              {% for zone in user.zone_access.all() %}
+              <span style="padding:0.1rem 0.4rem; border-radius:4px; font-size:0.62rem; font-weight:600; background:#eef2ff; color:#1a2c6b;">{{ zone.code }}</span>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </td>
+
+        <td style="padding:0.75rem 1.1rem;">
+          <div style="display:inline-flex; align-items:center; gap:0.35rem; font-size:0.76rem; font-weight:500; color:#16a34a;">
+            <div style="width:6px; height:6px; border-radius:50%; background:#16a34a;"></div>
+            Actif
+          </div>
+        </td>
+
+        <td style="padding:0.75rem 1.1rem;">
+          <div style="display:flex; gap:0.25rem;">
+            <a href="/backoffice/users/{{ user.pk }}/edit/"
+               style="padding:0.24rem 0.55rem; border-radius:4px; font-size:0.69rem; border:1px solid #e5e7eb; background:white; color:#6b7280; text-decoration:none; font-weight:500; transition:all 0.12s;"
+               onmouseover="this.style.borderColor='#1a2c6b'; this.style.color='#1a2c6b'; this.style.background='#f5f7ff';"
+               onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#6b7280'; this.style.background='white';">
+              ✏️ Modifier
+            </a>
+            {% if user.pk != request.user.pk %}
+            <form method="POST" action="/backoffice/users/{{ user.pk }}/delete/" style="display:inline;"
+                  onsubmit="return confirm('Supprimer {{ user.username }} ?');">
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{ request.COOKIES.get('csrftoken', '') }}">
+              <button type="button"
+        onclick="openDeleteModal('{{ user.pk }}', '{{ user.get_full_name() or user.username }}')"
+        style="padding:0.24rem 0.55rem; border-radius:4px; font-size:0.69rem; border:1px solid #e5e7eb; background:white; color:#6b7280; cursor:pointer; font-weight:500; transition:all 0.12s;"
+        onmouseover="this.style.borderColor='#dc2626'; this.style.color='#dc2626'; this.style.background='#fef2f2';"
+        onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#6b7280'; this.style.background='white';">
+  🗑️
+</button>
+            </form>
+            {% endif %}
+          </div>
+        </td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+<!-- Delete Modal -->
+<div id="deleteModal" style="display:none; position:fixed; inset:0; z-index:50; align-items:center; justify-content:center;">
+  
+    <!-- Backdrop -->
+    <div onclick="closeDeleteModal()"
+         style="position:absolute; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(2px);"></div>
+  
+    <!-- Modal card -->
+    <div style="position:relative; background:white; border-radius:16px; padding:2rem; width:100%; max-width:420px; box-shadow:0 24px 80px rgba(0,0,0,0.2); margin:1rem;">
+  
+      <!-- Icon -->
+      <div style="width:56px; height:56px; background:#fef2f2; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:1.2rem;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/>
+          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+        </svg>
+      </div>
+  
+      <h3 style="font-size:1.15rem; font-weight:700; color:#111827; margin-bottom:0.4rem;">
+        Supprimer l'utilisateur
+      </h3>
+      <p style="font-size:0.85rem; color:#6b7280; line-height:1.6; margin-bottom:1.5rem;">
+        Êtes-vous sûr de vouloir supprimer <strong id="deleteUserName" style="color:#111827;"></strong> ? Cette action est irréversible.
+      </p>
+  
+      <div style="display:flex; gap:0.6rem;">
+        <form id="deleteForm" method="POST" style="flex:1;">
+          <input type="hidden" name="csrfmiddlewaretoken" value="{{ request.COOKIES.get('csrftoken', '') }}">
+          <button type="submit"
+                  style="width:100%; padding:0.75rem; background:#dc2626; color:white; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:600; cursor:pointer; transition:background 0.15s;"
+                  onmouseover="this.style.background='#b91c1c';"
+                  onmouseout="this.style.background='#dc2626';">
+            Supprimer
+          </button>
+        </form>
+        <button onclick="closeDeleteModal()"
+                style="flex:1; padding:0.75rem; background:white; color:#374151; border:1px solid #e5e7eb; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:500; cursor:pointer; transition:all 0.15s;"
+                onmouseover="this.style.borderColor='#9ca3af';"
+                onmouseout="this.style.borderColor='#e5e7eb';">
+          Annuler
+        </button>
+      </div>
+  
+    </div>
+  </div>
+  
+  <script>
+    function openDeleteModal(userId, userName) {
+      document.getElementById('deleteUserName').textContent = userName;
+      document.getElementById('deleteForm').action = '/backoffice/users/' + userId + '/delete/';
+      document.getElementById('deleteModal').style.display = 'flex';
+    }
+  
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'none';
+    }
+  
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeDeleteModal();
+    });
+  </script>
+
+{% endblock %}

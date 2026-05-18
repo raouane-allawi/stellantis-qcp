@@ -1,0 +1,227 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_content %}
+
+<!-- Page header -->
+<div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+  <a href="/dashboard/"
+     style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:7px; border:1px solid #e5e7eb; background:white; color:#6b7280; text-decoration:none; transition:all 0.12s;"
+     onmouseover="this.style.borderColor='#1a2c6b'; this.style.color='#1a2c6b';"
+     onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#6b7280';">
+    ←
+  </a>
+  <div>
+    <div style="font-size:1.15rem; font-weight:700; color:#111827;">Mon Profil</div>
+    <div style="font-size:0.73rem; color:#6b7280; margin-top:2px;">Gérez vos informations personnelles</div>
+  </div>
+</div>
+
+<!-- Success / Error messages -->
+{% if success %}
+<div style="padding:0.75rem 1rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; color:#16a34a; font-size:0.85rem; font-weight:500; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+  ✅ {{ success }}
+</div>
+{% endif %}
+{% if error %}
+<div style="padding:0.75rem 1rem; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; color:#dc2626; font-size:0.85rem; font-weight:500; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+  ❌ {{ error }}
+</div>
+{% endif %}
+
+<div style="display:grid; grid-template-columns:1fr 2fr; gap:1.2rem; align-items:start;">
+
+  <!-- Left — Profile card -->
+  <div>
+    <div style="background:white; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; margin-bottom:1rem;">
+
+      <!-- Avatar section -->
+      <div style="padding:2rem; background:linear-gradient(135deg,#0f1a42,#1a2c6b); text-align:center;">
+        <div style="width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,#2952cc,#93b4ff); display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:700; color:white; margin:0 auto 0.75rem;">
+          {{ (request.user.first_name[0] if request.user.first_name else request.user.username[0])|upper }}{{ (request.user.last_name[0] if request.user.last_name else '')|upper }}
+        </div>
+        <div style="font-size:1rem; font-weight:700; color:white;">
+          {{ request.user.get_full_name() or request.user.username }}
+        </div>
+        <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:0.3rem;">
+          {{ request.user.email or 'Aucun email' }}
+        </div>
+        <div style="margin-top:0.75rem;">
+          {% if request.user.role == 'ADMIN' %}
+          <span style="background:rgba(255,255,255,0.15); color:white; padding:0.2rem 0.7rem; border-radius:20px; font-size:0.7rem; font-weight:600;">
+            Administrateur
+          </span>
+          {% elif request.user.role == 'SUPERVISOR' %}
+          <span style="background:rgba(255,255,255,0.15); color:white; padding:0.2rem 0.7rem; border-radius:20px; font-size:0.7rem; font-weight:600;">
+            Superviseur
+          </span>
+          {% else %}
+          <span style="background:rgba(255,255,255,0.15); color:white; padding:0.2rem 0.7rem; border-radius:20px; font-size:0.7rem; font-weight:600;">
+            Opérateur
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Info list -->
+      <div style="padding:1rem;">
+        <div style="display:flex; align-items:center; gap:0.6rem; padding:0.6rem 0; border-bottom:1px solid #f3f4f6;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          <div>
+            <div style="font-size:0.65rem; color:#9ca3af; text-transform:uppercase; letter-spacing:0.5px;">Matricule</div>
+            <div style="font-size:0.82rem; font-weight:500; color:#374151; font-family:monospace;">
+              {{ request.user.employee_id or request.user.username }}
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.6rem; padding:0.6rem 0; border-bottom:1px solid #f3f4f6;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          <div>
+            <div style="font-size:0.65rem; color:#9ca3af; text-transform:uppercase; letter-spacing:0.5px;">Téléphone</div>
+            <div style="font-size:0.82rem; font-weight:500; color:#374151;">
+              {{ request.user.phone or '—' }}
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.6rem; padding:0.6rem 0;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <div>
+            <div style="font-size:0.65rem; color:#9ca3af; text-transform:uppercase; letter-spacing:0.5px;">Dernière connexion</div>
+            <div style="font-size:0.82rem; font-weight:500; color:#374151;">
+              {% if last_login %}
+              {{ last_login.timestamp.strftime('%d/%m/%Y à %H:%M') }}
+              {% else %}
+              —
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right — Forms -->
+  <div>
+
+    <!-- Update info form -->
+    <div style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:1.5rem; margin-bottom:1rem;">
+      <div style="font-size:0.95rem; font-weight:700; color:#111827; margin-bottom:1.2rem; padding-bottom:0.75rem; border-bottom:1px solid #f3f4f6;">
+        Informations personnelles
+      </div>
+
+      <form method="POST">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ request.COOKIES.get('csrftoken', '') }}">
+        <input type="hidden" name="action" value="update_info">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+          <div>
+            <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Prénom</label>
+            <input type="text" name="first_name" value="{{ request.user.first_name }}"
+                   style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+                   onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+          </div>
+          <div>
+            <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Nom</label>
+            <input type="text" name="last_name" value="{{ request.user.last_name }}"
+                   style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+                   onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+          </div>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Email</label>
+          <input type="email" name="email" value="{{ request.user.email }}"
+                 style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+                 onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+                 onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+        </div>
+
+        <div style="margin-bottom:1.2rem;">
+          <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Téléphone</label>
+          <input type="text" name="phone" value="{{ request.user.phone or '' }}"
+                 style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+                 placeholder="+212 6XX XXX XXX"
+                 onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+                 onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+        </div>
+
+        <button type="submit"
+                style="padding:0.7rem 1.5rem; background:#1a2c6b; color:white; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:600; cursor:pointer;"
+                onmouseover="this.style.background='#243580';"
+                onmouseout="this.style.background='#1a2c6b';">
+          Enregistrer les modifications
+        </button>
+      </form>
+    </div>
+
+    <!-- Change password form -->
+    <div style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:1.5rem;">
+      <div style="font-size:0.95rem; font-weight:700; color:#111827; margin-bottom:1.2rem; padding-bottom:0.75rem; border-bottom:1px solid #f3f4f6;">
+        Changer le mot de passe
+      </div>
+
+      <form method="POST">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ request.COOKIES.get('csrftoken', '') }}">
+        <input type="hidden" name="action" value="change_password">
+
+        <div style="margin-bottom:1rem;">
+          <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Mot de passe actuel</label>
+          <input type="password" name="old_password"
+                 style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+                 placeholder="••••••••"
+                 onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+                 onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.2rem;">
+          <div>
+            <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Nouveau mot de passe</label>
+            <input type="password" name="new_password"
+                   style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+                   placeholder="••••••••"
+                   onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+          </div>
+          <div>
+            <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Confirmer</label>
+            <input type="password" name="confirm_password"
+                   style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+                   placeholder="••••••••"
+                   onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+          </div>
+        </div>
+
+        <button type="submit"
+                style="padding:0.7rem 1.5rem; background:#1a2c6b; color:white; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:600; cursor:pointer;"
+                onmouseover="this.style.background='#243580';"
+                onmouseout="this.style.background='#1a2c6b';">
+          Changer le mot de passe
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  @media (max-width: 768px) {
+    div[style*="grid-template-columns:1fr 2fr"] {
+      grid-template-columns: 1fr !important;
+    }
+    div[style*="grid-template-columns:1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+
+{% endblock %}

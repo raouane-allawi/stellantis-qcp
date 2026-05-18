@@ -1,0 +1,232 @@
+{% extends "base/base.html" %}
+
+{% block title %}Connexion — Stellantis QCP{% endblock %}
+
+{% block content %}
+<div style="display:flex; height:100vh; font-family:'DM Sans',sans-serif;">
+
+  <!-- ══ LEFT PANEL ══ -->
+  <div class="lp-left" style="
+    width:50%;
+    display:flex;
+    flex-direction:column;
+    padding:2.5rem 3rem;
+    position:relative;
+    overflow:hidden;
+    background: linear-gradient(135deg, #0f1a42 0%, #1a2c6b 100%);
+  ">
+
+    <!-- dot grid -->
+    <div style="
+      position:absolute; inset:0; pointer-events:none;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 26px 26px;
+    "></div>
+
+    <!-- glow -->
+    <div style="
+      position:absolute; top:-100px; left:-100px;
+      width:500px; height:500px; border-radius:50%;
+      background: radial-gradient(ellipse, rgba(41,82,204,0.4) 0%, transparent 70%);
+      pointer-events:none;
+    "></div>
+
+    <div style="position:relative; z-index:1; display:flex; flex-direction:column; height:100%;">
+
+   <!-- Logo -->
+  <div style="display:flex; flex-direction:column; align-items:flex-start; gap:2px;">
+    <img src="{{ static('img/stellantis_logo.png') }}"
+         alt="Stellantis"
+         style="height:150px; filter: brightness(0) invert(1);margin-left:-50px;" />
+    <div style="color:rgba(255,255,255,0.45); letter-spacing:3px; text-transform:uppercase; font-size:1.2rem;">
+      Qualité Contrôle Production
+    </div>
+  </div>
+      <!-- Headline -->
+      <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:1rem 0;">
+
+        <div style="
+          display:inline-flex; align-items:center; gap:8px;
+          padding:0.28rem 0.75rem; border-radius:20px; width:fit-content;
+          background:rgba(59,106,255,0.15); border:1px solid rgba(59,106,255,0.3);
+          color:#93b4ff; font-size:0.65rem; letter-spacing:1.5px;
+          text-transform:uppercase; margin-bottom:1rem;
+        ">
+          <span style="width:5px; height:5px; border-radius:50%; background:#93b4ff;
+                       animation:blink 2s infinite;"></span>
+          KPI en temps réel
+        </div>
+
+        <h1 style="color:white; font-weight:700; line-height:1.2; font-size:2.2rem;
+                   letter-spacing:-0.3px; margin-bottom:0.75rem;">
+          Supervision<br>Qualité <span style="color:#93b4ff;">Production</span>
+        </h1>
+
+        <p style="font-size:0.83rem; line-height:1.65; max-width:300px;
+                  color:rgba(255,255,255,0.42);">
+          Plateforme de pilotage des indicateurs de performance —
+          Contrôle, Retouche et Réactivité interne et externe.
+        </p>
+      </div>
+
+      <!-- KPI preview grid -->
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.55rem;">
+        {% for kpi in preview_kpis %}
+        <div style="
+          background:rgba(255,255,255,0.055);
+          border:1px solid rgba(255,255,255,0.08);
+          border-radius:10px; padding:0.65rem 0.75rem;
+        ">
+          <div style="font-size:0.58rem; letter-spacing:1.5px; text-transform:uppercase;
+                      color:rgba(255,255,255,0.32); margin-bottom:0.2rem;">
+            {{ kpi.name }}
+          </div>
+          <div style="font-size:1.25rem; font-weight:700; color:white; letter-spacing:-0.5px;">
+            {{ kpi.value }}
+          </div>
+          <div style="font-size:0.62rem; margin-top:0.1rem; font-weight:500;
+                      color:{{ '#4ade80' if kpi.trend == 'up' else '#f87171' }};">
+            {{ '↑' if kpi.trend == 'up' else '↓' }} {{ kpi.change }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ RIGHT PANEL ══ -->
+  <div style="
+    width:50%;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:2.5rem;
+  ">
+    <div style="width:100%; max-width:340px;">
+
+      <!-- Logo dark -->
+    <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px; margin-bottom:1.8rem;">
+      <img src="{{ static('img/stellantis_logo.png') }}"
+           alt="Stellantis"
+           style="height:100px; filter: brightness(0) saturate(100%) invert(14%) sepia(63%) saturate(800%) hue-rotate(200deg) brightness(70%);margin-left:-35px;" />
+      <div style="font-size:1rem; letter-spacing:2px; text-transform:uppercase; color:#9ca3af;">
+          KPI · QCP Dashboard
+      </div>
+    </div>
+
+      <h2 style="font-size:1.5rem; font-weight:700; color:#111827;
+                 letter-spacing:-0.3px; margin-bottom:0.25rem;">Connexion</h2>
+      <p style="font-size:0.82rem; color:#6b7280; margin-bottom:1.5rem;">
+        Accédez à votre espace de supervision
+      </p>
+
+      <!-- Error -->
+      {% if error %}
+      <div style="margin-bottom:1rem; padding:0.75rem 1rem; border-radius:8px;
+                  background:#fef2f2; border:1px solid #fecaca;
+                  color:#dc2626; font-size:0.82rem;">
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <!-- Form -->
+      <form method="POST" action="">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ request.COOKIES.get('csrftoken', '') }}">
+
+        <!-- Matricule -->
+        <div style="margin-bottom:1rem;">
+          <label style="display:block; font-size:0.72rem; font-weight:600;
+                        color:#374151; margin-bottom:0.4rem; letter-spacing:0.3px;">
+            Matricule
+          </label>
+          <div style="position:relative;">
+            <span style="position:absolute; left:0.8rem; top:50%; transform:translateY(-50%);
+                         color:#9ca3af; font-size:0.85rem; pointer-events:none;">🪪</span>
+            <input type="text" name="username"
+                   style="width:100%; padding:0.7rem 1rem 0.7rem 2.4rem;
+                          background:#f9fafb; border:1.5px solid #e5e7eb;
+                          border-radius:8px; font-size:0.87rem; color:#111827;
+                          font-family:'DM Sans',sans-serif; outline:none;
+                          transition:border-color 0.2s;"
+                   placeholder="ex: TA38787"
+                   onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';"
+                   required />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div style="margin-bottom:0.4rem;">
+          <label style="display:block; font-size:0.72rem; font-weight:600;
+                        color:#374151; margin-bottom:0.4rem; letter-spacing:0.3px;">
+            Mot de passe
+          </label>
+          <div style="position:relative;">
+            <span style="position:absolute; left:0.8rem; top:50%; transform:translateY(-50%);
+                         color:#9ca3af; font-size:0.85rem; pointer-events:none;">🔒</span>
+            <input type="password" name="password"
+                   style="width:100%; padding:0.7rem 1rem 0.7rem 2.4rem;
+                          background:#f9fafb; border:1.5px solid #e5e7eb;
+                          border-radius:8px; font-size:0.87rem; color:#111827;
+                          font-family:'DM Sans',sans-serif; outline:none;
+                          transition:border-color 0.2s;"
+                   placeholder="••••••••"
+                   onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';"
+                   required />
+          </div>
+        </div>
+
+        <!-- Forgot password -->
+        <div style="text-align:right; margin-bottom:1.2rem;">
+          <a href="/auth/password-reset/"
+             style="font-size:0.72rem; font-weight:500; color:#2952cc; text-decoration:none;">
+            Mot de passe oublié ?
+          </a>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" style="
+          width:100%; padding:0.78rem;
+          background:#1a2c6b; color:white;
+          border:none; border-radius:8px;
+          font-family:'DM Sans',sans-serif;
+          font-size:0.9rem; font-weight:600;
+          cursor:pointer; letter-spacing:0.3px;
+          transition:background 0.2s;
+        "
+        onmouseover="this.style.background='#243580';"
+        onmouseout="this.style.background='#1a2c6b';">
+          Se connecter →
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div style="display:flex; align-items:center; gap:0.75rem;
+                  margin:1.2rem 0; font-size:0.68rem; color:#9ca3af;
+                  text-transform:uppercase; letter-spacing:1px;">
+        <div style="flex:1; height:1px; background:#e5e7eb;"></div>
+        accès sécurisé
+        <div style="flex:1; height:1px; background:#e5e7eb;"></div>
+      </div>
+
+      <p style="text-align:center; font-size:0.71rem; color:#9ca3af; line-height:1.6;">
+        Réservé au personnel Stellantis autorisé.<br>
+        Problème ? Contactez votre administrateur.
+      </p>
+
+    </div>
+  </div>
+
+</div>
+
+<style>
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @media (max-width: 768px) {
+    .lp-left { display: none !important; }
+    div[style*="width:50%"] { width: 100% !important; }
+  }
+</style>
+{% endblock %}

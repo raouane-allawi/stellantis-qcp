@@ -1,0 +1,90 @@
+{% extends "backoffice/base_backoffice.html" %}
+
+{% block backoffice_content %}
+
+<!-- Page header -->
+<div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1rem;">
+  <div>
+    <div style="font-size:1.15rem; font-weight:700; color:#111827; letter-spacing:-0.2px;">Zones</div>
+    <div style="font-size:0.73rem; color:#6b7280; margin-top:2px;">Gérez les zones de production QCP</div>
+  </div>
+</div>
+
+<!-- Zones grid -->
+<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;">
+  {% for zone in zones %}
+  <div style="background:white; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+
+    <!-- Zone header -->
+    <div style="padding:1.2rem 1.4rem; background:linear-gradient(135deg, #0f1a42, #1a2c6b); position:relative;">
+      <div style="position:absolute; inset:0; background-image:radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px); background-size:20px 20px;"></div>
+      <div style="position:relative;">
+        <div style="font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:0.3rem;">
+          Code RSP
+        </div>
+        <div style="font-size:1.8rem; font-weight:800; color:white; letter-spacing:-0.5px;">
+          {{ zone.code }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone body -->
+    <div style="padding:1.2rem 1.4rem;">
+      <div style="font-size:0.95rem; font-weight:600; color:#111827; margin-bottom:0.3rem;">
+        {{ zone.name }}
+      </div>
+      {% if zone.description %}
+      <div style="font-size:0.78rem; color:#6b7280; margin-bottom:1rem; line-height:1.5;">
+        {{ zone.description }}
+      </div>
+      {% endif %}
+
+      <!-- Status -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+        <div style="display:inline-flex; align-items:center; gap:0.35rem; font-size:0.76rem; font-weight:500; color:#16a34a;">
+          <div style="width:6px; height:6px; border-radius:50%; background:#16a34a;"></div>
+          {% if zone.is_active %}Active{% else %}Inactive{% endif %}
+        </div>
+        <div style="font-size:0.75rem; color:#9ca3af;">
+          {{ zone.users.count() }} utilisateur(s)
+        </div>
+      </div>
+
+      <!-- Users list -->
+      {% if zone.users.all() %}
+      <div style="border-top:1px solid #f3f4f6; padding-top:0.8rem;">
+        <div style="font-size:0.65rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9ca3af; margin-bottom:0.5rem;">
+          Utilisateurs assignés
+        </div>
+        {% for user in zone.users.all() %}
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+          <div style="width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,#1a2c6b,#3b6aff); display:flex; align-items:center; justify-content:center; font-size:0.55rem; font-weight:700; color:white; flex-shrink:0;">
+            {{ (user.first_name[0] if user.first_name else user.username[0])|upper }}
+          </div>
+          <div style="font-size:0.78rem; color:#374151; font-weight:500;">
+            {{ user.get_full_name() or user.username }}
+          </div>
+          <div style="margin-left:auto;">
+            {% if user.role == 'ADMIN' %}
+            <span style="background:#eff6ff; color:#1d4ed8; padding:0.1rem 0.4rem; border-radius:3px; font-size:0.62rem; font-weight:600;">Admin</span>
+            {% elif user.role == 'SUPERVISOR' %}
+            <span style="background:#f0fdf4; color:#16a34a; padding:0.1rem 0.4rem; border-radius:3px; font-size:0.62rem; font-weight:600;">Sup.</span>
+            {% else %}
+            <span style="background:#fffbeb; color:#d97706; padding:0.1rem 0.4rem; border-radius:3px; font-size:0.62rem; font-weight:600;">Op.</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="border-top:1px solid #f3f4f6; padding-top:0.8rem; font-size:0.78rem; color:#9ca3af; text-align:center;">
+        Aucun utilisateur assigné
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

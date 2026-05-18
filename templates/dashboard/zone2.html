@@ -1,0 +1,29 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_content %}
+
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+  <div>
+    <div style="font-size:1.1rem; font-weight:700; color:#111827;">Zone PEI — Indicateurs de Performance</div>
+    <div style="font-size:0.72rem; color:#6b7280; margin-top:2px;">Période: {{ periode }}</div>
+  </div>
+  <div style="display:flex; gap:0.3rem;">
+    <a href="/dashboard/zone1/" style="padding:0.4rem 1rem; border-radius:7px; font-size:0.78rem; font-weight:500; text-decoration:none; background:white; color:#6b7280; border:1px solid #e5e7eb;">QCP</a>
+    <a href="/dashboard/zone2/" style="padding:0.4rem 1rem; border-radius:7px; font-size:0.78rem; font-weight:500; text-decoration:none; background:#1a2c6b; color:white; border:1px solid #1a2c6b;">PEI</a>
+    <a href="/dashboard/zone3/" style="padding:0.4rem 1rem; border-radius:7px; font-size:0.78rem; font-weight:500; text-decoration:none; background:white; color:#6b7280; border:1px solid #e5e7eb;">MON</a>
+  </div>
+</div>
+
+<div style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:3rem; text-align:center;">
+  <div style="width:64px; height:64px; background:#eef2ff; border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 1.2rem; font-size:1.8rem;">
+    🚧
+  </div>
+  <div style="font-size:1.1rem; font-weight:700; color:#111827; margin-bottom:0.4rem;">
+    Zone PEI — En cours de configuration
+  </div>
+  <div style="font-size:0.85rem; color:#6b7280; max-width:400px; margin:0 auto;">
+    Les KPIs de cette zone seront disponibles dès réception des données API Stellantis.
+  </div>
+</div>
+
+{% endblock %}

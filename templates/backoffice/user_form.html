@@ -1,0 +1,157 @@
+{% extends "backoffice/base_backoffice.html" %}
+
+{% block backoffice_content %}
+
+<!-- Page header -->
+<div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+  <a href="/backoffice/users/"
+     style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:7px; border:1px solid #e5e7eb; background:white; color:#6b7280; text-decoration:none; transition:all 0.12s;"
+     onmouseover="this.style.borderColor='#1a2c6b'; this.style.color='#1a2c6b';"
+     onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#6b7280';">
+    ←
+  </a>
+  <div>
+    <div style="font-size:1.15rem; font-weight:700; color:#111827;">
+      {% if action == 'create' %}Nouvel utilisateur{% else %}Modifier l'utilisateur{% endif %}
+    </div>
+    <div style="font-size:0.73rem; color:#6b7280; margin-top:2px;">
+      {% if action == 'create' %}Créer un nouveau compte utilisateur{% else %}Modifier les informations de {{ user_obj.username }}{% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Form card -->
+<div style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:2rem; max-width:680px;">
+
+  <form method="POST">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ request.COOKIES.get('csrftoken', '') }}">
+
+    <!-- Name row -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+      <div>
+        <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Prénom</label>
+        <input type="text" name="first_name"
+               value="{{ user_obj.first_name if user_obj else '' }}"
+               style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+               placeholder="Prénom"
+               onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+               onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+      </div>
+      <div>
+        <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Nom</label>
+        <input type="text" name="last_name"
+               value="{{ user_obj.last_name if user_obj else '' }}"
+               style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+               placeholder="Nom de famille"
+               onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+               onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+      </div>
+    </div>
+
+    <!-- Username & Employee ID -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+      <div>
+        <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">
+          Nom d'utilisateur {% if action == 'create' %}<span style="color:#dc2626;">*</span>{% endif %}
+        </label>
+        <input type="text" name="username"
+               value="{{ user_obj.username if user_obj else '' }}"
+               {% if action == 'edit' %}readonly style="width:100%; padding:0.7rem 1rem; background:#f3f4f6; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#9ca3af; font-family:'DM Sans',sans-serif; outline:none;"
+               {% else %}style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+               onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+               onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';"{% endif %}
+               placeholder="ex: TA38787" {% if action == 'create' %}required{% endif %} />
+      </div>
+      <div>
+        <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Matricule</label>
+        <input type="text" name="employee_id"
+               value="{{ user_obj.employee_id if user_obj and user_obj.employee_id else '' }}"
+               style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+               placeholder="ex: TA38787"
+               onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+               onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div style="margin-bottom:1rem;">
+      <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Email professionnel</label>
+      <input type="email" name="email"
+             value="{{ user_obj.email if user_obj else '' }}"
+             style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+             placeholder="prenom.nom@stellantis.com"
+             onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+             onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+    </div>
+
+    <!-- Role -->
+    <div style="margin-bottom:1rem;">
+      <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Rôle <span style="color:#dc2626;">*</span></label>
+      <select name="role"
+              style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+              onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+              onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';"
+              required>
+        <option value="">-- Choisir un rôle --</option>
+        <option value="ADMIN" {% if user_obj and user_obj.role == 'ADMIN' %}selected{% endif %}>Administrateur</option>
+        <option value="SUPERVISOR" {% if user_obj and user_obj.role == 'SUPERVISOR' %}selected{% endif %}>Superviseur</option>
+        <option value="OPERATOR" {% if user_obj and user_obj.role == 'OPERATOR' %}selected{% endif %}>Opérateur</option>
+      </select>
+    </div>
+
+    <!-- Zones -->
+    <div style="margin-bottom:1rem;">
+      <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.6rem;">Zones d'accès</label>
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+        {% for zone in zones %}
+        <label style="display:flex; align-items:center; gap:0.5rem; padding:0.55rem 1rem; border:1.5px solid #e5e7eb; border-radius:8px; cursor:pointer; font-size:0.82rem; color:#374151; transition:all 0.12s;"
+               onmouseover="this.style.borderColor='#1a2c6b'; this.style.background='#f5f7ff';"
+               onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='white';">
+          <input type="checkbox" name="zones" value="{{ zone.pk }}"
+                 {% if user_obj and zone in user_obj.zone_access.all() %}checked{% endif %}
+                 style="accent-color:#1a2c6b;" />
+          <span style="font-weight:600; color:#1a2c6b;">{{ zone.code }}</span>
+          <span style="color:#6b7280;">— {{ zone.name }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Password (only on create) -->
+    {% if action == 'create' %}
+    <div style="margin-bottom:1.5rem;">
+      <label style="display:block; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">
+        Mot de passe <span style="color:#dc2626;">*</span>
+      </label>
+      <input type="password" name="password"
+             style="width:100%; padding:0.7rem 1rem; background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.87rem; color:#111827; font-family:'DM Sans',sans-serif; outline:none;"
+             placeholder="••••••••"
+             onfocus="this.style.borderColor='#2952cc'; this.style.background='white';"
+             onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';"
+             required />
+      <div style="font-size:0.72rem; color:#9ca3af; margin-top:0.4rem;">
+        L'utilisateur pourra changer son mot de passe via "Mot de passe oublié".
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Buttons -->
+    <div style="display:flex; gap:0.6rem; padding-top:1rem; border-top:1px solid #f3f4f6;">
+      <button type="submit"
+              style="padding:0.7rem 1.5rem; background:#1a2c6b; color:white; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:600; cursor:pointer;"
+              onmouseover="this.style.background='#243580';"
+              onmouseout="this.style.background='#1a2c6b';">
+        {% if action == 'create' %}Créer l'utilisateur{% else %}Enregistrer les modifications{% endif %}
+      </button>
+      <a href="/backoffice/users/"
+         style="padding:0.7rem 1.5rem; background:white; color:#374151; border:1px solid #e5e7eb; border-radius:8px; font-size:0.88rem; font-weight:500; text-decoration:none; transition:all 0.12s;"
+         onmouseover="this.style.borderColor='#9ca3af';"
+         onmouseout="this.style.borderColor='#e5e7eb';">
+        Annuler
+      </a>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}

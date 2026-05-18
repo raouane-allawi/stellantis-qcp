@@ -1,0 +1,225 @@
+{% extends "backoffice/base_backoffice.html" %}
+
+{% block backoffice_content %}
+
+<!-- Page header -->
+<div style="margin-bottom:1rem;">
+  <div style="font-size:1.15rem; font-weight:700; color:#111827; letter-spacing:-0.2px;">Logs d'audit</div>
+  <div style="font-size:0.73rem; color:#6b7280; margin-top:2px;">Historique de toutes les actions effectuées dans l'application</div>
+</div>
+
+<!-- Filter bar -->
+<form method="GET" style="background:white; border:1px solid #e5e7eb; border-radius:9px; padding:0.85rem 1.1rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+
+  <!-- Search -->
+  <div style="position:relative; flex:1; min-width:180px;">
+    <svg style="position:absolute; left:0.7rem; top:50%; transform:translateY(-50%); pointer-events:none;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" name="search" value="{{ search }}"
+           placeholder="Rechercher par utilisateur ou description..."
+           style="width:100%; padding:0.45rem 0.75rem 0.45rem 2rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.78rem; color:#374151; font-family:'DM Sans',sans-serif; outline:none; background:#f9fafb;"
+           onfocus="this.style.borderColor='#1a2c6b'; this.style.background='white';"
+           onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb';" />
+  </div>
+
+  <!-- Action filter -->
+  <select name="action"
+          style="padding:0.45rem 0.75rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.78rem; color:#374151; font-family:'DM Sans',sans-serif; outline:none; background:#f9fafb;">
+    <option value="">Toutes les actions</option>
+    {% for value, label in action_choices %}
+    <option value="{{ value }}" {% if action_filter == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Date from -->
+  <div style="display:flex; align-items:center; gap:0.4rem;">
+    <span style="font-size:0.72rem; color:#6b7280; font-weight:500;">Du</span>
+    <input type="date" name="date_from" value="{{ date_from }}"
+           style="padding:0.45rem 0.75rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.78rem; color:#374151; font-family:'DM Sans',sans-serif; outline:none; background:#f9fafb;"
+           onfocus="this.style.borderColor='#1a2c6b';"
+           onblur="this.style.borderColor='#e5e7eb';" />
+  </div>
+
+  <!-- Date to -->
+  <div style="display:flex; align-items:center; gap:0.4rem;">
+    <span style="font-size:0.72rem; color:#6b7280; font-weight:500;">Au</span>
+    <input type="date" name="date_to" value="{{ date_to }}"
+           style="padding:0.45rem 0.75rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.78rem; color:#374151; font-family:'DM Sans',sans-serif; outline:none; background:#f9fafb;"
+           onfocus="this.style.borderColor='#1a2c6b';"
+           onblur="this.style.borderColor='#e5e7eb';" />
+  </div>
+
+  <!-- Submit -->
+  <button type="submit"
+          style="padding:0.45rem 1rem; background:#1a2c6b; color:white; border:none; border-radius:6px; font-size:0.78rem; font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif;"
+          onmouseover="this.style.background='#243580';"
+          onmouseout="this.style.background='#1a2c6b';">
+    Filtrer
+  </button>
+
+  <!-- Reset -->
+  {% if search or action_filter or date_from or date_to %}
+  <a href="/backoffice/logs/"
+     style="padding:0.45rem 0.8rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.78rem; color:#6b7280; text-decoration:none; background:white;"
+     onmouseover="this.style.borderColor='#9ca3af';"
+     onmouseout="this.style.borderColor='#e5e7eb';">
+    ✕ Réinitialiser
+  </a>
+  {% endif %}
+
+</form>
+
+<!-- Table -->
+<div style="background:white; border:1px solid #e5e7eb; border-radius:9px; overflow:hidden;">
+
+  <div style="padding:0.75rem 1.1rem; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:0.6rem;">
+    <div style="font-size:0.87rem; font-weight:600; color:#111827;">Journal d'activité</div>
+    <div style="font-size:0.65rem; padding:0.1rem 0.42rem; border-radius:6px; background:#f3f4f6; color:#6b7280; font-weight:600;">
+      {{ total_count }} entrées
+    </div>
+    {% if search or action_filter or date_from or date_to %}
+    <div style="font-size:0.65rem; padding:0.1rem 0.42rem; border-radius:6px; background:#eef2ff; color:#1a2c6b; font-weight:600;">
+      Filtres actifs
+    </div>
+    {% endif %}
+  </div>
+
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="background:#f9fafb; border-bottom:1px solid #e5e7eb;">
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">Date & Heure</th>
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">Utilisateur</th>
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">Action</th>
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">Description</th>
+        <th style="padding:0.55rem 1.1rem; text-align:left; font-size:0.62rem; letter-spacing:0.8px; text-transform:uppercase; color:#9ca3af; font-weight:700;">IP</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr style="border-bottom:1px solid #f3f4f6;">
+
+        <td style="padding:0.75rem 1.1rem;">
+          <div style="font-size:0.78rem; color:#374151; font-weight:500;">{{ log.timestamp.strftime('%d/%m/%Y') }}</div>
+          <div style="font-size:0.68rem; color:#9ca3af;">{{ log.timestamp.strftime('%H:%M:%S') }}</div>
+        </td>
+
+        <td style="padding:0.75rem 1.1rem;">
+          {% if log.user %}
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="width:24px; height:24px; border-radius:50%; background:linear-gradient(135deg,#1a2c6b,#3b6aff); display:flex; align-items:center; justify-content:center; font-size:0.55rem; font-weight:700; color:white; flex-shrink:0;">
+              {{ (log.user.first_name[0] if log.user.first_name else log.user.username[0])|upper }}
+            </div>
+            <div style="font-size:0.78rem; color:#374151; font-weight:500;">{{ log.user.get_full_name() or log.user.username }}</div>
+          </div>
+          {% else %}
+          <span style="font-size:0.78rem; color:#9ca3af;">Système</span>
+          {% endif %}
+        </td>
+
+        <td style="padding:0.75rem 1.1rem;">
+          {% if log.action == 'LOGIN' %}
+          <span style="background:#f0fdf4; color:#16a34a; padding:0.18rem 0.55rem; border-radius:4px; font-size:0.68rem; font-weight:600;">Connexion</span>
+          {% elif log.action == 'LOGOUT' %}
+          <span style="background:#f9fafb; color:#6b7280; padding:0.18rem 0.55rem; border-radius:4px; font-size:0.68rem; font-weight:600;">Déconnexion</span>
+          {% elif log.action == 'USER_CREATED' %}
+          <span style="background:#eff6ff; color:#1d4ed8; padding:0.18rem 0.55rem; border-radius:4px; font-size:0.68rem; font-weight:600;">Utilisateur créé</span>
+          {% elif log.action == 'USER_UPDATED' %}
+          <span style="background:#fffbeb; color:#d97706; padding:0.18rem 0.55rem; border-radius:4px; font-size:0.68rem; font-weight:600;">Utilisateur modifié</span>
+          {% elif log.action == 'USER_DELETED' %}
+          <span style="background:#fef2f2; color:#dc2626; padding:0.18rem 0.55rem; border-radius:4px; font-size:0.68rem; font-weight:600;">Utilisateur supprimé</span>
+          {% else %}
+          <span style="background:#f3f4f6; color:#6b7280; padding:0.18rem 0.55rem; border-radius:4px; font-size:0.68rem; font-weight:600;">{{ log.action }}</span>
+          {% endif %}
+        </td>
+
+        <td style="padding:0.75rem 1.1rem; font-size:0.78rem; color:#6b7280;">{{ log.description or '—' }}</td>
+
+        <td style="padding:0.75rem 1.1rem;">
+          <span style="font-family:monospace; font-size:0.72rem; color:#9ca3af;">{{ log.ip_address or '—' }}</span>
+        </td>
+
+      </tr>
+      {% endfor %}
+
+      {% if not logs %}
+      <tr>
+        <td colspan="5" style="padding:2rem; text-align:center; color:#9ca3af; font-size:0.85rem;">
+          {% if search or action_filter or date_from or date_to %}
+          Aucun résultat pour ces filtres.
+          {% else %}
+          Aucun log disponible.
+          {% endif %}
+        </td>
+      </tr>
+      {% endif %}
+
+    </tbody>
+  </table>
+
+<!-- Pagination -->
+    {% if page_obj.has_other_pages() %}
+    <div style="padding:0.75rem 1.1rem; border-top:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between;">
+      
+      <div style="font-size:0.75rem; color:#6b7280;">
+        Page {{ page_obj.number }} sur {{ paginator.num_pages }} — {{ total_count }} entrées au total
+      </div>
+
+      <div style="display:flex; gap:0.3rem;">
+
+        <!-- First -->
+        {% if page_obj.has_previous() %}
+        <a href="?page=1&search={{ search }}&action={{ action_filter }}&date_from={{ date_from }}&date_to={{ date_to }}"
+           style="padding:0.35rem 0.65rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.75rem; color:#374151; text-decoration:none; background:white;"
+           onmouseover="this.style.borderColor='#1a2c6b'; this.style.color='#1a2c6b';"
+           onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#374151';">
+          «
+        </a>
+        <!-- Prev -->
+        <a href="?page={{ page_obj.previous_page_number }}&search={{ search }}&action={{ action_filter }}&date_from={{ date_from }}&date_to={{ date_to }}"
+           style="padding:0.35rem 0.65rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.75rem; color:#374151; text-decoration:none; background:white;"
+           onmouseover="this.style.borderColor='#1a2c6b'; this.style.color='#1a2c6b';"
+           onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#374151';">
+          ‹
+        </a>
+        {% endif %}
+
+        <!-- Page numbers -->
+        {% for num in paginator.page_range %}
+          {% if page_obj.number == num %}
+          <span style="padding:0.35rem 0.65rem; border:1px solid #1a2c6b; border-radius:6px; font-size:0.75rem; color:white; background:#1a2c6b; font-weight:600;">
+            {{ num }}
+          </span>
+          {% elif num > page_obj.number - 3 and num < page_obj.number + 3 %}
+          <a href="?page={{ num }}&search={{ search }}&action={{ action_filter }}&date_from={{ date_from }}&date_to={{ date_to }}"
+             style="padding:0.35rem 0.65rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.75rem; color:#374151; text-decoration:none; background:white;"
+             onmouseover="this.style.borderColor='#1a2c6b'; this.style.color='#1a2c6b';"
+             onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#374151';">
+            {{ num }}
+          </a>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Next -->
+        {% if page_obj.has_next() %}
+        <a href="?page={{ page_obj.next_page_number }}&search={{ search }}&action={{ action_filter }}&date_from={{ date_from }}&date_to={{ date_to }}"
+           style="padding:0.35rem 0.65rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.75rem; color:#374151; text-decoration:none; background:white;"
+           onmouseover="this.style.borderColor='#1a2c6b'; this.style.color='#1a2c6b';"
+           onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#374151';">
+          ›
+        </a>
+        <!-- Last -->
+        <a href="?page={{ paginator.num_pages }}&search={{ search }}&action={{ action_filter }}&date_from={{ date_from }}&date_to={{ date_to }}"
+           style="padding:0.35rem 0.65rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.75rem; color:#374151; text-decoration:none; background:white;"
+           onmouseover="this.style.borderColor='#1a2c6b'; this.style.color='#1a2c6b';"
+           onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#374151';">
+          »
+        </a>
+        {% endif %}
+
+      </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
