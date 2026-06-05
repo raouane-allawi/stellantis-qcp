@@ -2,28 +2,197 @@
 
 {% block dashboard_content %}
 
+<!-- Page top -->
 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
   <div>
-    <div style="font-size:1.1rem; font-weight:700; color:#111827;">Zone PEI — Indicateurs de Performance</div>
-    <div style="font-size:0.72rem; color:#6b7280; margin-top:2px;">Période: {{ periode }}</div>
+    <div style="font-size:1.1rem; font-weight:700; color:#111827;">Zone Contrôle — Indicateurs de Performance</div>
+    <div style="font-size:0.72rem; color:#6b7280; margin-top:2px;">
+      Contrôle Qualité · Période: {{ periode }}
+    </div>
   </div>
   <div style="display:flex; gap:0.3rem;">
-    <a href="/dashboard/zone1/" style="padding:0.4rem 1rem; border-radius:7px; font-size:0.78rem; font-weight:500; text-decoration:none; background:white; color:#6b7280; border:1px solid #e5e7eb;">QCP</a>
-    <a href="/dashboard/zone2/" style="padding:0.4rem 1rem; border-radius:7px; font-size:0.78rem; font-weight:500; text-decoration:none; background:#1a2c6b; color:white; border:1px solid #1a2c6b;">PEI</a>
-    <a href="/dashboard/zone3/" style="padding:0.4rem 1rem; border-radius:7px; font-size:0.78rem; font-weight:500; text-decoration:none; background:white; color:#6b7280; border:1px solid #e5e7eb;">MON</a>
+    <a href="/dashboard/zone1/" style="padding:0.4rem 1rem; border-radius:7px; font-size:0.78rem; font-weight:500; text-decoration:none; background:white; color:#6b7280; border:1px solid #e5e7eb;">RTCH</a>
+    <a href="/dashboard/zone2/" style="padding:0.4rem 1rem; border-radius:7px; font-size:0.78rem; font-weight:500; text-decoration:none; background:#1a2c6b; color:white; border:1px solid #1a2c6b;">Contrôle</a>
+    <a href="/dashboard/zone3/" style="padding:0.4rem 1rem; border-radius:7px; font-size:0.78rem; font-weight:500; text-decoration:none; background:white; color:#6b7280; border:1px solid #e5e7eb;">Réactivité</a>
   </div>
 </div>
 
-<div style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:3rem; text-align:center;">
-  <div style="width:64px; height:64px; background:#eef2ff; border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 1.2rem; font-size:1.8rem;">
-    🚧
-  </div>
-  <div style="font-size:1.1rem; font-weight:700; color:#111827; margin-bottom:0.4rem;">
-    Zone PEI — En cours de configuration
-  </div>
-  <div style="font-size:0.85rem; color:#6b7280; max-width:400px; margin:0 auto;">
-    Les KPIs de cette zone seront disponibles dès réception des données API Stellantis.
+<!-- Filter bar -->
+<div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:1rem; padding:0.6rem 1rem; background:white; border:1px solid #e5e7eb; border-radius:9px;">
+  <span style="font-size:0.72rem; font-weight:600; color:#6b7280;">Période</span>
+  <select style="padding:0.3rem 0.7rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.78rem; color:#374151; font-family:'DM Sans',sans-serif; outline:none; background:#f9fafb;">
+    <option>Aujourd'hui</option>
+    <option>Cette semaine</option>
+    <option>Ce mois</option>
+  </select>
+  <span style="font-size:0.72rem; font-weight:600; color:#6b7280; margin-left:0.5rem;">RSP</span>
+  <select style="padding:0.3rem 0.7rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.78rem; color:#374151; font-family:'DM Sans',sans-serif; outline:none; background:#f9fafb;">
+    <option selected>FER</option>
+    <option>MON</option>
+    <option>PEI</option>
+  </select>
+  <span style="font-size:0.68rem; color:#9ca3af; margin-left:auto;" id="last-update-text">
+    Mise à jour: {{ last_update }}
+  </span>
+  <a href="/dashboard/zone2/export/csv/?zone=CONTROLE"
+     style="display:flex; align-items:center; gap:0.4rem; padding:0.35rem 0.8rem; background:white; color:#374151; border:1px solid #e5e7eb; border-radius:6px; font-size:0.75rem; font-weight:500; text-decoration:none;"
+     onmouseover="this.style.borderColor='#16a34a'; this.style.color='#16a34a';"
+     onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#374151';">
+    📊 CSV
+  </a>
+  <a href="/dashboard/zone2/export/excel/?zone=CONTROLE"
+     style="display:flex; align-items:center; gap:0.4rem; padding:0.35rem 0.8rem; background:white; color:#374151; border:1px solid #e5e7eb; border-radius:6px; font-size:0.75rem; font-weight:500; text-decoration:none;"
+     onmouseover="this.style.borderColor='#16a34a'; this.style.color='#16a34a';"
+     onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#374151';">
+    📗 Excel
+  </a>
+  <button hx-get="/dashboard/zone2/kpis/"
+          hx-target="#kpi-container"
+          hx-swap="innerHTML"
+          hx-indicator="#refresh-spinner"
+          style="display:flex; align-items:center; gap:0.4rem; padding:0.35rem 0.8rem; background:#1a2c6b; color:white; border:none; border-radius:6px; font-size:0.75rem; font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif;"
+          onmouseover="this.style.background='#243580';"
+          onmouseout="this.style.background='#1a2c6b';">
+    <span id="refresh-spinner" class="htmx-indicator">⟳</span>
+    Actualiser
+  </button>
+</div>
+
+<!-- KPI Container -->
+<div id="kpi-container"
+     hx-get="/dashboard/zone2/kpis/"
+     hx-trigger="every 60s"
+     hx-swap="innerHTML">
+  {% include "dashboard/partials/zone2_kpis.html" %}
+</div>
+
+<!-- ══ KPI HISTORY MODAL ══ -->
+<div id="kpi-modal" style="display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center;">
+  <div onclick="closeKpiModal()" style="position:absolute; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(3px);"></div>
+  <div class="modal-card" style="position:relative; border-radius:16px; padding:2rem; width:100%; max-width:700px; max-height:90vh; overflow-y:auto; box-shadow:0 32px 80px rgba(0,0,0,0.2); margin:1rem; background:white;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+      <div>
+        <div id="modal-kpi-name" style="font-size:1.3rem; font-weight:700; color:#111827;"></div>
+        <div style="font-size:0.78rem; color:#6b7280; margin-top:2px;">Historique des valeurs</div>
+      </div>
+      <button onclick="closeKpiModal()" class="modal-close-btn"
+              style="width:32px; height:32px; border-radius:8px; border:1px solid #e5e7eb; background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; color:#6b7280;">✕</button>
+    </div>
+    <div class="modal-date-bar" style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem; padding:0.75rem 1rem; background:#f9fafb; border:1px solid #e5e7eb; border-radius:9px; flex-wrap:wrap;">
+      <span style="font-size:0.78rem; font-weight:600; color:#374151;">Période</span>
+      <input type="date" id="modal-date-from" style="padding:0.4rem 0.7rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.82rem; color:#374151; font-family:'DM Sans',sans-serif; outline:none; background:white;" />
+      <span style="font-size:0.78rem; color:#9ca3af;">→</span>
+      <input type="date" id="modal-date-to" style="padding:0.4rem 0.7rem; border:1px solid #e5e7eb; border-radius:6px; font-size:0.82rem; color:#374151; font-family:'DM Sans',sans-serif; outline:none; background:white;" />
+      <button onclick="loadHistory()" style="padding:0.4rem 1rem; background:#1a2c6b; color:white; border:none; border-radius:6px; font-size:0.8rem; font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif;">Afficher</button>
+    </div>
+    <div id="modal-stats" style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; margin-bottom:1.5rem;"></div>
+    <div style="position:relative; height:280px;"><canvas id="kpi-chart"></canvas></div>
   </div>
 </div>
+
+<style>
+  .modal-card { background: white; }
+  .modal-close-btn { background: white; }
+  .modal-date-bar { background: #f9fafb; }
+  body.dark-mode .modal-card { background: #1e293b !important; color: #e2e8f0 !important; }
+  body.dark-mode .modal-close-btn { background: #334155 !important; border-color: #475569 !important; color: #e2e8f0 !important; }
+  body.dark-mode .modal-date-bar { background: #334155 !important; border-color: #475569 !important; }
+  body.dark-mode .modal-date-bar input { background: #475569 !important; border-color: #64748b !important; color: #e2e8f0 !important; }
+  body.dark-mode #modal-kpi-name { color: #f1f5f9 !important; }
+  body.dark-mode #kpi-chart { filter: brightness(2.5) saturate(1.5) !important; }
+  @media (max-width: 768px) {
+    div[style*="repeat(3,1fr)"] { grid-template-columns: 1fr !important; }
+    #last-update-text { display: none !important; }
+  }
+</style>
+
+<script>
+  let currentKpiName = '';
+  let currentTarget  = 1.0;
+  let chartInstance  = null;
+
+  function openKpiModal(kpiName, target) {
+    currentKpiName = kpiName;
+    currentTarget  = target;
+    document.getElementById('modal-kpi-name').textContent = kpiName + ' — Historique';
+    document.getElementById('kpi-modal').style.display = 'flex';
+    const today = new Date();
+    const from  = new Date();
+    from.setDate(today.getDate() - 30);
+    document.getElementById('modal-date-from').value = from.toISOString().split('T')[0];
+    document.getElementById('modal-date-to').value   = today.toISOString().split('T')[0];
+    loadHistory();
+  }
+
+  function closeKpiModal() {
+    document.getElementById('kpi-modal').style.display = 'none';
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  }
+
+  function loadHistory() {
+    const dateFrom = document.getElementById('modal-date-from').value;
+    const dateTo   = document.getElementById('modal-date-to').value;
+    if (!dateFrom || !dateTo) return;
+    fetch(`/dashboard/zone2/history/${currentKpiName}/?date_from=${dateFrom}&date_to=${dateTo}`)
+      .then(r => r.json())
+      .then(data => { renderChart(data); renderStats(data); });
+  }
+
+  function renderStats(data) {
+    const values = data.values;
+    const avg = (values.reduce((a,b) => a+b, 0) / values.length).toFixed(3);
+    const min = Math.min(...values).toFixed(3);
+    const max = Math.max(...values).toFixed(3);
+    const isDark = document.body.classList.contains('dark-mode');
+    const bg = isDark ? '#334155' : '#f9fafb';
+    const border = isDark ? '#475569' : '#e5e7eb';
+    const text = isDark ? '#f1f5f9' : '#111827';
+    const sub = isDark ? '#94a3b8' : '#6b7280';
+    document.getElementById('modal-stats').innerHTML = `
+      <div style="background:${bg}; border:1px solid ${border}; border-radius:8px; padding:0.75rem 1rem; text-align:center;">
+        <div style="font-size:1.4rem; font-weight:700; color:${text};">${avg}</div>
+        <div style="font-size:0.7rem; color:${sub}; margin-top:2px;">Moyenne</div>
+      </div>
+      <div style="background:${bg}; border:1px solid ${border}; border-radius:8px; padding:0.75rem 1rem; text-align:center;">
+        <div style="font-size:1.4rem; font-weight:700; color:#16a34a;">${min}</div>
+        <div style="font-size:0.7rem; color:${sub}; margin-top:2px;">Minimum</div>
+      </div>
+      <div style="background:${bg}; border:1px solid ${border}; border-radius:8px; padding:0.75rem 1rem; text-align:center;">
+        <div style="font-size:1.4rem; font-weight:700; color:#dc2626;">${max}</div>
+        <div style="font-size:0.7rem; color:${sub}; margin-top:2px;">Maximum</div>
+      </div>`;
+  }
+
+  function renderChart(data) {
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+    const isDark = document.body.classList.contains('dark-mode');
+    const gridColor = isDark ? '#334155' : '#f3f4f6';
+    const lineColor = isDark ? '#6b9fff' : '#1a2c6b';
+    const ctx = document.getElementById('kpi-chart').getContext('2d');
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.labels,
+        datasets: [
+          { label: data.kpi_name, data: data.values, borderColor: lineColor, backgroundColor: isDark ? 'rgba(107,159,255,0.1)' : 'rgba(26,44,107,0.06)', borderWidth: 2, pointRadius: 3, pointBackgroundColor: lineColor, tension: 0.3, fill: true },
+          { label: 'Cible', data: data.labels.map(() => data.target), borderColor: '#dc2626', borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0, fill: false }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { font: { family: 'DM Sans', size: 12 }, usePointStyle: true, color: isDark ? '#e2e8f0' : '#374151' } },
+          tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)}` } }
+        },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { font: { family: 'DM Sans', size: 11 }, color: isDark ? '#94a3b8' : '#6b7280' } },
+          y: { grid: { color: gridColor }, ticks: { font: { family: 'DM Sans', size: 11 }, color: isDark ? '#94a3b8' : '#6b7280' } }
+        }
+      }
+    });
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeKpiModal(); });
+</script>
 
 {% endblock %}

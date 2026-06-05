@@ -151,22 +151,20 @@ onmouseout="this.style.background='rgba(255,255,255,0.06)';">
       <div style="padding:0.55rem 1rem 0.2rem; font-size:0.8rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#9ca3af;">
         Zones KPI
       </div>
-
       <a href="/dashboard/zone1/" style="display:flex; align-items:center; gap:0.55rem; padding:0.5rem 0.7rem; margin:0.04rem 0.45rem; border-radius:7px; font-size:0.8rem; text-decoration:none; transition:all 0.12s;
-         {% if request.resolver_match.url_name == 'zone1' %}background:#eef2ff; color:#1a2c6b; font-weight:600;{% else %}color:#6b7280;{% endif %}">
-        <span style="width:15px; text-align:center;">①</span> Zone QCP
-      </a>
-
-      <a href="/dashboard/zone2/" style="display:flex; align-items:center; gap:0.55rem; padding:0.5rem 0.7rem; margin:0.04rem 0.45rem; border-radius:7px; font-size:0.8rem; text-decoration:none; transition:all 0.12s;
-         {% if request.resolver_match.url_name == 'zone2' %}background:#eef2ff; color:#1a2c6b; font-weight:600;{% else %}color:#6b7280;{% endif %}">
-        <span style="width:15px; text-align:center;">②</span> Zone PEI
-      </a>
-
-      <a href="/dashboard/zone3/" style="display:flex; align-items:center; gap:0.55rem; padding:0.5rem 0.7rem; margin:0.04rem 0.45rem; border-radius:7px; font-size:0.8rem; text-decoration:none; transition:all 0.12s;
-         {% if request.resolver_match.url_name == 'zone3' %}background:#eef2ff; color:#1a2c6b; font-weight:600;{% else %}color:#6b7280;{% endif %}">
-        <span style="width:15px; text-align:center;">③</span> Zone MON
-      </a>
-
+      {% if request.resolver_match.url_name == 'zone1' %}background:#eef2ff; color:#1a2c6b; font-weight:600;{% else %}color:#6b7280;{% endif %}">
+     <span style="width:15px; text-align:center;">①</span> Zone RTCH
+   </a>
+   
+   <a href="/dashboard/zone2/" style="display:flex; align-items:center; gap:0.55rem; padding:0.5rem 0.7rem; margin:0.04rem 0.45rem; border-radius:7px; font-size:0.8rem; text-decoration:none; transition:all 0.12s;
+      {% if request.resolver_match.url_name == 'zone2' %}background:#eef2ff; color:#1a2c6b; font-weight:600;{% else %}color:#6b7280;{% endif %}">
+     <span style="width:15px; text-align:center;">②</span> Zone Contrôle
+   </a>
+   
+   <a href="/dashboard/zone3/" style="display:flex; align-items:center; gap:0.55rem; padding:0.5rem 0.7rem; margin:0.04rem 0.45rem; border-radius:7px; font-size:0.8rem; text-decoration:none; transition:all 0.12s;
+      {% if request.resolver_match.url_name == 'zone3' %}background:#eef2ff; color:#1a2c6b; font-weight:600;{% else %}color:#6b7280;{% endif %}">
+     <span style="width:15px; text-align:center;">③</span> Zone Réactivité
+   </a>
     </div>
     <div style="padding:0.55rem; border-top:1px solid #e5e7eb;">
       <div style="font-size:0.62rem; color:#9ca3af; text-align:center; padding:0.3rem;">

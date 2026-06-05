@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import redirect
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 urlpatterns = [
     path('admin/', admin.site.urls),

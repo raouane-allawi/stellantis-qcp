@@ -122,15 +122,32 @@ def user_delete(request, pk):
 
 @admin_required
 def zones_list(request):
-    zones = Zone.objects.prefetch_related('users').all()
-    return render(request, 'backoffice/zones_list.html', {'zones': zones})
+    zones     = Zone.objects.prefetch_related('users').all()
+    all_users = User.objects.order_by('first_name', 'last_name')
+    return render(request, 'backoffice/zones_list.html', {
+        'zones':     zones,
+        'all_users': all_users,
+    })
+
+
+@admin_required
+def zone_assign_user(request, zone_pk):
+    zone = get_object_or_404(Zone, pk=zone_pk)
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        action  = request.POST.get('action')
+        user    = get_object_or_404(User, pk=user_id)
+        if action == 'add':
+            zone.users.add(user)
+        elif action == 'remove':
+            zone.users.remove(user)
+    return redirect('backoffice:zones_list')
 
 
 @admin_required
 def logs_list(request):
     logs = AuditLog.objects.select_related('user').order_by('-timestamp')
 
-    # ── Filters ──
     search    = request.GET.get('search', '').strip()
     action    = request.GET.get('action', '')
     date_from = request.GET.get('date_from', '')
@@ -152,7 +169,6 @@ def logs_list(request):
     if date_to:
         logs = logs.filter(timestamp__date__lte=date_to)
 
-    # ── Pagination ──
     paginator   = Paginator(logs, 10)
     page_number = request.GET.get('page', 1)
     page_obj    = paginator.get_page(page_number)

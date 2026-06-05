@@ -4,6 +4,7 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from datetime import datetime, date, timedelta
+from functools import wraps
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
@@ -19,7 +20,7 @@ def generate_sparkline():
     return " ".join(points)
 
 
-def get_status(value, target=1.0):
+def get_status(value):
     if value < 0.5:
         return 'good'
     elif value <= 1.0:
@@ -28,18 +29,76 @@ def get_status(value, target=1.0):
         return 'bad'
 
 
-KPI_TARGETS = {
-    'DVX':    1.0,
-    'DVT':    1.0,
-    'DVM':    1.0,
-    'SCA':    1.0,
-    'DRR':    1.0,
-    'BDACOM': 1.0,
+
+def zone_required(zone_code):
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if request.user.is_admin:
+                return view_func(request, *args, **kwargs)
+            user_zones = request.user.zone_access.values_list('code', flat=True)
+            if zone_code not in user_zones:
+                return redirect('dashboard:home')
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
+
+
+
+# ── KPI display names ──
+KPI_LABELS = {
+    # RTCH
+    'Encours':                      'Encours',
+    'Duree_Veillissement':          'Durée Veillissement',
+    'Temps_Retouche':               'Temps de Retouche',
+    'Taux_Remplissage':             'Taux de Remplissage',
+    'Consommation_RTCH':            'Consommation RTCH',
+    'NBR_ALT':                      'NBR ALT',
+    'NBR_Accidents':                'NBR Accidents',
+    'PDS_NOK_RTCH':                 'PDS NOK RTCH',
+    'NBR_Machines_Panne':           'NBR Machines Panne',
+    'NBR_Effectif':                 'NBR Effectif',
+    'NBR_Irritants_Sociaux':        'NBR Irritants Sociaux',
+    'Audits_5S':                    'Audits 5S',
+    'Bloquages_Reactivite':         'Bloquages Réactivité',
+    'Bloquages_Ingenierie':         'Bloquages Ingénierie',
+    # CONTROLE
+    'DVX':                          'DVX',
+    'DPV':                          'DPV',
+    'NR_QCP':                       'NR QCP',
+    'iPPM':                         'iPPM',
+    'BD_BuyOff':                    'BD BuyOff',
+    'Detection_Buyoff':             '% Détection Buyoff',
+    'Detection_SCA':                '% Détection SCA',
+    'DVR':                          'DVR',
+    'FRB00':                        'FRB00',
+    'Veh_Bloque':                   'Veh Bloqué',
+    'Post_it_Total':                'Post-it Total',
+    'Post_it_Recidives':            'Post-it Récidives',
+    'NBR_PDS':                      'NBR PDS',
+    'Temps_Reactivite':             'Temps Réactivité',
+    'NBR_SPA_Fab':                  'NBR SPA Fab',
+    # REACTIVITE
+    'DRR_Buyoff':                   'DRR Buyoff',
+    'DPV_SCA_SPA':                  'DPV SCA-SPA',
+    'Suivi_PACT':                   'Suivi PACT',
+    'Duree_Reactivite_Fournisseur': 'Durée Réactivité Fournisseur',
+    'NBR_Retard_PACT':              'NBR Retard PACT',
+    'NBR_AMADEUS':                  'NBR AMADEUS',
+    'Total_Cost_AMADEUS':           'Total Cost AMADEUS',
+    'Return_Cost_AMADEUS':          'Return Cost AMADEUS',
+    'GAP_AMADEUS':                  'GAP AMADEUS',
+    'NBR_Plant_ALT':                'NBR Plant ALT',
+    'YH_Standby':                   'YH Standby / Confirmé',
 }
 
+KPI_TARGETS = {k: 1.0 for k in KPI_LABELS}
 
-def get_zone1_kpis():
-    raw_kpis = fetch_kpis('QCP')
+
+def build_kpis(zone_code):
+    raw_kpis = fetch_kpis(zone_code)
     kpis = []
     for raw in raw_kpis:
         name   = raw.get('kpi_type', 'UNKNOWN')
@@ -47,9 +106,10 @@ def get_zone1_kpis():
         target = KPI_TARGETS.get(name, 1.0)
         prev   = round(random.uniform(value * 0.85, value * 1.15), 3)
         diff   = round(value - prev, 3)
-        status = get_status(value, target)
+        status = get_status(value)
         kpis.append({
             'name':      name,
+            'label':     KPI_LABELS.get(name, name),
             'value':     value,
             'target':    target,
             'status':    status,
@@ -64,65 +124,139 @@ def get_zone1_kpis():
 
 @login_required
 def home(request):
-    zone1_kpis = get_zone1_kpis()
+    user = request.user
+    if user.is_admin:
+        user_zones = ['RTCH', 'CONTROLE', 'REACTIVITE']
+    else:
+        user_zones = list(user.zone_access.values_list('code', flat=True))
+
+    zone1_kpis = build_kpis('RTCH') if 'RTCH' in user_zones else []
+    zone2_kpis = build_kpis('CONTROLE') if 'CONTROLE' in user_zones else []
+    zone3_kpis = build_kpis('REACTIVITE') if 'REACTIVITE' in user_zones else []
+
     zone1_good = sum(1 for k in zone1_kpis if k['status'] == 'good')
     zone1_warn = sum(1 for k in zone1_kpis if k['status'] == 'warn')
     zone1_bad  = sum(1 for k in zone1_kpis if k['status'] == 'bad')
+
+    zone2_good = sum(1 for k in zone2_kpis if k['status'] == 'good')
+    zone2_warn = sum(1 for k in zone2_kpis if k['status'] == 'warn')
+    zone2_bad  = sum(1 for k in zone2_kpis if k['status'] == 'bad')
+
+    zone3_good = sum(1 for k in zone3_kpis if k['status'] == 'good')
+    zone3_warn = sum(1 for k in zone3_kpis if k['status'] == 'warn')
+    zone3_bad  = sum(1 for k in zone3_kpis if k['status'] == 'bad')
+
     return render(request, 'dashboard/home.html', {
         'zone1_kpis':  zone1_kpis,
         'zone1_good':  zone1_good,
         'zone1_warn':  zone1_warn,
         'zone1_bad':   zone1_bad,
+        'zone2_kpis':  zone2_kpis,
+        'zone2_good':  zone2_good,
+        'zone2_warn':  zone2_warn,
+        'zone2_bad':   zone2_bad,
+        'zone3_kpis':  zone3_kpis,
+        'zone3_good':  zone3_good,
+        'zone3_warn':  zone3_warn,
+        'zone3_bad':   zone3_bad,
+        'user_zones':  user_zones,
         'periode':     date.today().strftime('%d/%m/%Y'),
         'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
     })
 
-
+    
 @login_required
 def index(request):
     return redirect('dashboard:home')
 
 
 @login_required
+@zone_required('RTCH')
 def zone1(request):
-    kpis = get_zone1_kpis()
+    kpis = build_kpis('RTCH')
     good = sum(1 for k in kpis if k['status'] == 'good')
     warn = sum(1 for k in kpis if k['status'] == 'warn')
     bad  = sum(1 for k in kpis if k['status'] == 'bad')
     return render(request, 'dashboard/zone1.html', {
-        'kpis': kpis,
-        'periode': date.today().strftime('%d/%m/%Y'),
+        'kpis':        kpis,
+        'zone_name':   'RTCH',
+        'zone_full':   'Retouche',
+        'periode':     date.today().strftime('%d/%m/%Y'),
         'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
-        'summary': {'good': good, 'warn': warn, 'bad': bad},
+        'summary':     {'good': good, 'warn': warn, 'bad': bad},
     })
 
 
 @login_required
+@zone_required('CONTROLE')
 def zone2(request):
+    kpis = build_kpis('CONTROLE')
+    good = sum(1 for k in kpis if k['status'] == 'good')
+    warn = sum(1 for k in kpis if k['status'] == 'warn')
+    bad  = sum(1 for k in kpis if k['status'] == 'bad')
     return render(request, 'dashboard/zone2.html', {
-        'periode': date.today().strftime('%d/%m/%Y'),
+        'kpis':        kpis,
+        'zone_name':   'CONTROLE',
+        'zone_full':   'Contrôle',
+        'periode':     date.today().strftime('%d/%m/%Y'),
         'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+        'summary':     {'good': good, 'warn': warn, 'bad': bad},
     })
 
 
 @login_required
+@zone_required('REACTIVITE')
 def zone3(request):
+    kpis = build_kpis('REACTIVITE')
+    good = sum(1 for k in kpis if k['status'] == 'good')
+    warn = sum(1 for k in kpis if k['status'] == 'warn')
+    bad  = sum(1 for k in kpis if k['status'] == 'bad')
     return render(request, 'dashboard/zone3.html', {
-        'periode': date.today().strftime('%d/%m/%Y'),
+        'kpis':        kpis,
+        'zone_name':   'REACTIVITE',
+        'zone_full':   'Réactivité',
+        'periode':     date.today().strftime('%d/%m/%Y'),
         'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+        'summary':     {'good': good, 'warn': warn, 'bad': bad},
     })
 
 
 @login_required
 def zone1_kpis_partial(request):
-    kpis = get_zone1_kpis()
+    kpis = build_kpis('RTCH')
     good = sum(1 for k in kpis if k['status'] == 'good')
     warn = sum(1 for k in kpis if k['status'] == 'warn')
     bad  = sum(1 for k in kpis if k['status'] == 'bad')
     return render(request, 'dashboard/partials/zone1_kpis.html', {
-        'kpis': kpis,
+        'kpis':        kpis,
         'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
-        'summary': {'good': good, 'warn': warn, 'bad': bad},
+        'summary':     {'good': good, 'warn': warn, 'bad': bad},
+    })
+
+
+@login_required
+def zone2_kpis_partial(request):
+    kpis = build_kpis('CONTROLE')
+    good = sum(1 for k in kpis if k['status'] == 'good')
+    warn = sum(1 for k in kpis if k['status'] == 'warn')
+    bad  = sum(1 for k in kpis if k['status'] == 'bad')
+    return render(request, 'dashboard/partials/zone2_kpis.html', {
+        'kpis':        kpis,
+        'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+        'summary':     {'good': good, 'warn': warn, 'bad': bad},
+    })
+
+
+@login_required
+def zone3_kpis_partial(request):
+    kpis = build_kpis('REACTIVITE')
+    good = sum(1 for k in kpis if k['status'] == 'good')
+    warn = sum(1 for k in kpis if k['status'] == 'warn')
+    bad  = sum(1 for k in kpis if k['status'] == 'bad')
+    return render(request, 'dashboard/partials/zone3_kpis.html', {
+        'kpis':        kpis,
+        'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+        'summary':     {'good': good, 'warn': warn, 'bad': bad},
     })
 
 
@@ -136,16 +270,16 @@ def kpi_history(request, kpi_name):
     except (ValueError, TypeError):
         date_to   = datetime.now()
         date_from = date_to - timedelta(days=30)
-    target = KPI_TARGETS.get(kpi_name.upper(), 1.0)
+    target = KPI_TARGETS.get(kpi_name, 1.0)
     labels = []
     values = []
     current = date_from
     while current <= date_to:
         labels.append(current.strftime('%d/%m'))
-        values.append(round(random.uniform(target * 0.6, target * 1.5), 3))
+        values.append(round(random.uniform(0.0, 2.0), 3))
         current += timedelta(days=1)
     return JsonResponse({
-        'kpi_name':  kpi_name.upper(),
+        'kpi_name':  KPI_LABELS.get(kpi_name, kpi_name),
         'target':    target,
         'labels':    labels,
         'values':    values,
@@ -156,12 +290,13 @@ def kpi_history(request, kpi_name):
 
 @login_required
 def export_csv(request):
-    kpis = get_zone1_kpis()
-    response = HttpResponse(content_type='text/csv; charset=utf-8')
-    response['Content-Disposition'] = f'attachment; filename="KPI_QCP_{date.today()}.csv"'
+    zone_code = request.GET.get('zone', 'RTCH')
+    kpis      = build_kpis(zone_code)
+    response  = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="KPI_{zone_code}_{date.today()}.csv"'
     response.write('\ufeff')
     writer = csv.writer(response, delimiter=';')
-    writer.writerow(['Rapport KPI — Zone QCP'])
+    writer.writerow([f'Rapport KPI — Zone {zone_code}'])
     writer.writerow([f'Date extraction: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}'])
     writer.writerow([f'Période: {date.today().strftime("%d/%m/%Y")}'])
     writer.writerow([])
@@ -169,7 +304,7 @@ def export_csv(request):
     for kpi in kpis:
         status_label = {'good': 'Dans la cible', 'warn': 'Alerte', 'bad': 'Hors cible'}.get(kpi['status'], '')
         writer.writerow([
-            kpi['name'],
+            kpi['label'],
             str(kpi['value']).replace('.', ','),
             str(kpi['target']).replace('.', ','),
             status_label,
@@ -182,10 +317,11 @@ def export_csv(request):
 
 @login_required
 def export_excel(request):
-    kpis = get_zone1_kpis()
+    zone_code = request.GET.get('zone', 'RTCH')
+    kpis      = build_kpis(zone_code)
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "KPI Zone QCP"
+    ws.title = f"KPI Zone {zone_code}"
     navy   = "1A2C6B"
     green  = "16A34A"
     orange = "D97706"
@@ -193,7 +329,7 @@ def export_excel(request):
     white  = "FFFFFF"
     gray   = "F9FAFB"
     ws.merge_cells('A1:G1')
-    ws['A1'] = 'STELLANTIS — Rapport KPI Zone QCP'
+    ws['A1'] = f'STELLANTIS — Rapport KPI Zone {zone_code}'
     ws['A1'].font      = Font(name='Calibri', size=14, bold=True, color=white)
     ws['A1'].fill      = PatternFill("solid", fgColor=navy)
     ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
@@ -202,8 +338,8 @@ def export_excel(request):
     ws['B2'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
     ws['A3'] = 'Période:'
     ws['B3'] = date.today().strftime('%d/%m/%Y')
-    ws['A4'] = 'RSP:'
-    ws['B4'] = 'QCP'
+    ws['A4'] = 'Zone:'
+    ws['B4'] = zone_code
     for row in [2, 3, 4]:
         ws.cell(row=row, column=1).font = Font(bold=True, color=navy)
     headers = ['KPI', 'Valeur', 'Cible', 'Statut', 'Tendance', 'Minimum', 'Maximum']
@@ -219,7 +355,7 @@ def export_excel(request):
         row_fill = gray if row_idx % 2 == 0 else white
         color    = status_colors.get(kpi['status'], '000000')
         label    = status_labels.get(kpi['status'], '')
-        data = [kpi['name'], kpi['value'], kpi['target'], label, kpi['change'], kpi['min'], kpi['max']]
+        data = [kpi['label'], kpi['value'], kpi['target'], label, kpi['change'], kpi['min'], kpi['max']]
         for col_idx, value in enumerate(data, 1):
             cell = ws.cell(row=row_idx, column=col_idx, value=value)
             cell.font      = Font(name='Calibri', size=10)
@@ -234,22 +370,23 @@ def export_excel(request):
             if col_idx == 4:
                 cell.font = Font(name='Calibri', size=10, bold=True, color=color)
         ws.row_dimensions[row_idx].height = 20
-    widths = [12, 12, 12, 18, 12, 12, 12]
+    widths = [30, 12, 12, 18, 12, 12, 12]
     for col, width in enumerate(widths, 1):
         ws.column_dimensions[get_column_letter(col)].width = width
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response['Content-Disposition'] = f'attachment; filename="KPI_QCP_{date.today()}.xlsx"'
+    response['Content-Disposition'] = f'attachment; filename="KPI_{zone_code}_{date.today()}.xlsx"'
     wb.save(response)
     return response
 
 
 @login_required
 def kpi_comparison(request):
-    kpis = get_zone1_kpis()
+    zone_code = request.GET.get('zone', 'RTCH')
+    kpis = build_kpis(zone_code)
     return JsonResponse({
-        'labels':    [k['name'] for k in kpis],
+        'labels':    [k['label'] for k in kpis],
         'values':    [k['value'] for k in kpis],
         'statuses':  [k['status'] for k in kpis],
         'threshold': 1.0,

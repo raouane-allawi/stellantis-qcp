@@ -22,7 +22,6 @@
 
     <!-- Right -->
     <div style="margin-left:auto; display:flex; align-items:center; gap:0.6rem;">
-
        <!-- Dark mode toggle -->
        <button id="theme-toggle" onclick="toggleTheme()"
          style="width:34px; height:34px; border-radius:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:rgba(255,255,255,0.5); transition:all 0.15s;"
@@ -48,6 +47,7 @@
           {{ request.user.get_full_name() or request.user.username }}
         </span>
       </div>
+      
 
       <!-- Logout -->
       <a href="/auth/logout/" style="display:flex; align-items:center; gap:0.4rem; padding:0.65rem 0.9rem; border-radius:20px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); font-size:0.72rem; color:rgba(255,255,255,0.5); text-decoration:none; transition:all 0.15s;"

@@ -15,7 +15,7 @@
 <!-- Zone cards row -->
 <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.2rem;">
 
-  <!-- Zone QCP -->
+  {% if 'RTCH' in user_zones %}
   <a href="/dashboard/zone1/" style="text-decoration:none;">
     <div class="zone-card" style="background:white; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.04); transition:box-shadow 0.2s; cursor:pointer;"
          onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)';"
@@ -24,8 +24,8 @@
         <div style="position:absolute; inset:0; background-image:radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px); background-size:20px 20px;"></div>
         <div style="position:relative;">
           <div style="font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:0.3rem;">Zone</div>
-          <div style="font-size:1.8rem; font-weight:800; color:white; letter-spacing:-0.5px;">QCP</div>
-          <div style="font-size:0.72rem; color:rgba(255,255,255,0.5); margin-top:0.2rem;">Qualité Contrôle Production</div>
+          <div style="font-size:1.8rem; font-weight:800; color:white; letter-spacing:-0.5px;">RTCH</div>
+          <div style="font-size:0.72rem; color:rgba(255,255,255,0.5); margin-top:0.2rem;">Retouche</div>
         </div>
       </div>
       <div style="padding:1rem 1.4rem;">
@@ -45,7 +45,7 @@
         </div>
         {% for kpi in zone1_kpis %}
         <div style="display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid #f3f4f6;">
-          <div style="font-size:0.75rem; font-weight:600; color:#374151;">{{ kpi.name }}</div>
+          <div style="font-size:0.75rem; font-weight:600; color:#374151;">{{ kpi.label }}</div>
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <div style="font-size:0.78rem; font-weight:700; color:#111827;">{{ kpi.value }}</div>
             <div style="width:8px; height:8px; border-radius:50%;
@@ -59,8 +59,9 @@
       </div>
     </div>
   </a>
+  {% endif %}
 
-  <!-- Zone PEI -->
+  {% if 'CONTROLE' in user_zones %}
   <a href="/dashboard/zone2/" style="text-decoration:none;">
     <div class="zone-card" style="background:white; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.04); transition:box-shadow 0.2s; cursor:pointer;"
          onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)';"
@@ -69,24 +70,44 @@
         <div style="position:absolute; inset:0; background-image:radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px); background-size:20px 20px;"></div>
         <div style="position:relative;">
           <div style="font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:0.3rem;">Zone</div>
-          <div style="font-size:1.8rem; font-weight:800; color:white; letter-spacing:-0.5px;">PEI</div>
-          <div style="font-size:0.72rem; color:rgba(255,255,255,0.5); margin-top:0.2rem;">En attente de configuration</div>
+          <div style="font-size:1.8rem; font-weight:800; color:white; letter-spacing:-0.5px;">CONTRÔLE</div>
+          <div style="font-size:0.72rem; color:rgba(255,255,255,0.5); margin-top:0.2rem;">Contrôle Qualité</div>
         </div>
       </div>
       <div style="padding:1rem 1.4rem;">
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem 0; text-align:center;">
-          <div style="width:48px; height:48px; background:#eef2ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:0.8rem;">🚧</div>
-          <div style="font-size:0.82rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">En cours de configuration</div>
-          <div style="font-size:0.72rem; color:#9ca3af; line-height:1.5;">Les KPIs seront disponibles dès réception des données API.</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem; margin-bottom:1rem;">
+          <div style="text-align:center; padding:0.6rem; background:#f0fdf4; border-radius:8px;">
+            <div style="font-size:1.4rem; font-weight:700; color:#16a34a;">{{ zone2_good }}</div>
+            <div style="font-size:0.62rem; color:#16a34a; font-weight:500;">OK</div>
+          </div>
+          <div style="text-align:center; padding:0.6rem; background:#fffbeb; border-radius:8px;">
+            <div style="font-size:1.4rem; font-weight:700; color:#d97706;">{{ zone2_warn }}</div>
+            <div style="font-size:0.62rem; color:#d97706; font-weight:500;">Alerte</div>
+          </div>
+          <div style="text-align:center; padding:0.6rem; background:#fef2f2; border-radius:8px;">
+            <div style="font-size:1.4rem; font-weight:700; color:#dc2626;">{{ zone2_bad }}</div>
+            <div style="font-size:0.62rem; color:#dc2626; font-weight:500;">Hors cible</div>
+          </div>
         </div>
-        <div style="margin-top:0.5rem; text-align:center;">
-          <span style="font-size:0.75rem; color:#1a2c6b; font-weight:600;">Voir la zone →</span>
+        {% for kpi in zone2_kpis %}
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid #f3f4f6;">
+          <div style="font-size:0.75rem; font-weight:600; color:#374151;">{{ kpi.label }}</div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="font-size:0.78rem; font-weight:700; color:#111827;">{{ kpi.value }}</div>
+            <div style="width:8px; height:8px; border-radius:50%;
+                 background:{% if kpi.status == 'good' %}#16a34a{% elif kpi.status == 'warn' %}#d97706{% else %}#dc2626{% endif %};"></div>
+          </div>
+        </div>
+        {% endfor %}
+        <div style="margin-top:0.8rem; text-align:center;">
+          <span style="font-size:0.75rem; color:#1a2c6b; font-weight:600;">Voir le détail →</span>
         </div>
       </div>
     </div>
   </a>
+  {% endif %}
 
-  <!-- Zone MON -->
+  {% if 'REACTIVITE' in user_zones %}
   <a href="/dashboard/zone3/" style="text-decoration:none;">
     <div class="zone-card" style="background:white; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.04); transition:box-shadow 0.2s; cursor:pointer;"
          onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)';"
@@ -95,46 +116,68 @@
         <div style="position:absolute; inset:0; background-image:radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px); background-size:20px 20px;"></div>
         <div style="position:relative;">
           <div style="font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:0.3rem;">Zone</div>
-          <div style="font-size:1.8rem; font-weight:800; color:white; letter-spacing:-0.5px;">MON</div>
-          <div style="font-size:0.72rem; color:rgba(255,255,255,0.5); margin-top:0.2rem;">En attente de configuration</div>
+          <div style="font-size:1.8rem; font-weight:800; color:white; letter-spacing:-0.5px;">RÉACTIVITÉ</div>
+          <div style="font-size:0.72rem; color:rgba(255,255,255,0.5); margin-top:0.2rem;">Réactivité Fournisseur</div>
         </div>
       </div>
       <div style="padding:1rem 1.4rem;">
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem 0; text-align:center;">
-          <div style="width:48px; height:48px; background:#eef2ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:0.8rem;">🚧</div>
-          <div style="font-size:0.82rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">En cours de configuration</div>
-          <div style="font-size:0.72rem; color:#9ca3af; line-height:1.5;">Les KPIs seront disponibles dès réception des données API.</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem; margin-bottom:1rem;">
+          <div style="text-align:center; padding:0.6rem; background:#f0fdf4; border-radius:8px;">
+            <div style="font-size:1.4rem; font-weight:700; color:#16a34a;">{{ zone3_good }}</div>
+            <div style="font-size:0.62rem; color:#16a34a; font-weight:500;">OK</div>
+          </div>
+          <div style="text-align:center; padding:0.6rem; background:#fffbeb; border-radius:8px;">
+            <div style="font-size:1.4rem; font-weight:700; color:#d97706;">{{ zone3_warn }}</div>
+            <div style="font-size:0.62rem; color:#d97706; font-weight:500;">Alerte</div>
+          </div>
+          <div style="text-align:center; padding:0.6rem; background:#fef2f2; border-radius:8px;">
+            <div style="font-size:1.4rem; font-weight:700; color:#dc2626;">{{ zone3_bad }}</div>
+            <div style="font-size:0.62rem; color:#dc2626; font-weight:500;">Hors cible</div>
+          </div>
         </div>
-        <div style="margin-top:0.5rem; text-align:center;">
-          <span style="font-size:0.75rem; color:#1a2c6b; font-weight:600;">Voir la zone →</span>
+        {% for kpi in zone3_kpis %}
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid #f3f4f6;">
+          <div style="font-size:0.75rem; font-weight:600; color:#374151;">{{ kpi.label }}</div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="font-size:0.78rem; font-weight:700; color:#111827;">{{ kpi.value }}</div>
+            <div style="width:8px; height:8px; border-radius:50%;
+                 background:{% if kpi.status == 'good' %}#16a34a{% elif kpi.status == 'warn' %}#d97706{% else %}#dc2626{% endif %};"></div>
+          </div>
+        </div>
+        {% endfor %}
+        <div style="margin-top:0.8rem; text-align:center;">
+          <span style="font-size:0.75rem; color:#1a2c6b; font-weight:600;">Voir le détail →</span>
         </div>
       </div>
     </div>
   </a>
+  {% endif %}
 
 </div>
 
-<!-- Comparison chart -->
-<div class="chart-card" style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:1.2rem;">
-  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
-    <div>
-      <div style="font-size:0.87rem; font-weight:600; color:#111827;">Comparaison des KPIs — Zone QCP</div>
-      <div style="font-size:0.72rem; color:#6b7280; margin-top:2px;">Vue comparative de tous les indicateurs</div>
-    </div>
-    <div style="display:flex; align-items:center; gap:1rem; font-size:0.72rem;">
-      <div style="display:flex; align-items:center; gap:0.3rem;">
-        <div style="width:12px; height:3px; background:#d97706; border-radius:2px;"></div>
-        <span style="color:#6b7280;">Seuil alerte (0.5)</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:0.3rem;">
-        <div style="width:12px; height:3px; background:#dc2626; border-radius:2px;"></div>
-        <span style="color:#6b7280;">Seuil critique (1.0)</span>
-      </div>
-    </div>
+<!-- Comparison charts -->
+<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.2rem;">
+  {% if 'RTCH' in user_zones %}
+  <div class="chart-card" style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:1rem 1.2rem;">
+    <div style="font-size:0.82rem; font-weight:600; color:#111827; margin-bottom:0.3rem;">KPIs — Zone RTCH</div>
+    <div style="font-size:0.68rem; color:#6b7280; margin-bottom:0.75rem;">Vue comparative</div>
+    <div style="position:relative; height:180px;"><canvas id="chart-rtch"></canvas></div>
   </div>
-  <div style="position:relative; height:260px;">
-    <canvas id="comparison-chart"></canvas>
+  {% endif %}
+  {% if 'CONTROLE' in user_zones %}
+  <div class="chart-card" style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:1rem 1.2rem;">
+    <div style="font-size:0.82rem; font-weight:600; color:#111827; margin-bottom:0.3rem;">KPIs — Zone Contrôle</div>
+    <div style="font-size:0.68rem; color:#6b7280; margin-bottom:0.75rem;">Vue comparative</div>
+    <div style="position:relative; height:180px;"><canvas id="chart-controle"></canvas></div>
   </div>
+  {% endif %}
+  {% if 'REACTIVITE' in user_zones %}
+  <div class="chart-card" style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:1rem 1.2rem;">
+    <div style="font-size:0.82rem; font-weight:600; color:#111827; margin-bottom:0.3rem;">KPIs — Zone Réactivité</div>
+    <div style="font-size:0.68rem; color:#6b7280; margin-bottom:0.75rem;">Vue comparative</div>
+    <div style="position:relative; height:180px;"><canvas id="chart-reactivite"></canvas></div>
+  </div>
+  {% endif %}
 </div>
 
 <!-- Bottom row -->
@@ -143,20 +186,26 @@
   <!-- Global summary -->
   <div class="summary-card-home" style="background:white; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
     <div style="padding:0.75rem 1.1rem; border-bottom:1px solid #e5e7eb;">
-      <div style="font-size:0.87rem; font-weight:600; color:#111827;">Résumé global</div>
+      <div style="font-size:0.87rem; font-weight:600; color:#111827;">Résumé global — Zones accessibles</div>
     </div>
     <div style="padding:1rem 1.1rem;">
       <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem;">
         <div style="text-align:center; padding:1rem; background:#f0fdf4; border-radius:9px;">
-          <div style="font-size:2rem; font-weight:700; color:#16a34a; line-height:1;">{{ zone1_good }}</div>
+          <div style="font-size:2rem; font-weight:700; color:#16a34a; line-height:1;">
+            {{ (zone1_good if 'RTCH' in user_zones else 0) + (zone2_good if 'CONTROLE' in user_zones else 0) + (zone3_good if 'REACTIVITE' in user_zones else 0) }}
+          </div>
           <div style="font-size:0.7rem; color:#16a34a; margin-top:4px; font-weight:500;">Dans la cible</div>
         </div>
         <div style="text-align:center; padding:1rem; background:#fffbeb; border-radius:9px;">
-          <div style="font-size:2rem; font-weight:700; color:#d97706; line-height:1;">{{ zone1_warn }}</div>
+          <div style="font-size:2rem; font-weight:700; color:#d97706; line-height:1;">
+            {{ (zone1_warn if 'RTCH' in user_zones else 0) + (zone2_warn if 'CONTROLE' in user_zones else 0) + (zone3_warn if 'REACTIVITE' in user_zones else 0) }}
+          </div>
           <div style="font-size:0.7rem; color:#d97706; margin-top:4px; font-weight:500;">En alerte</div>
         </div>
         <div style="text-align:center; padding:1rem; background:#fef2f2; border-radius:9px;">
-          <div style="font-size:2rem; font-weight:700; color:#dc2626; line-height:1;">{{ zone1_bad }}</div>
+          <div style="font-size:2rem; font-weight:700; color:#dc2626; line-height:1;">
+            {{ (zone1_bad if 'RTCH' in user_zones else 0) + (zone2_bad if 'CONTROLE' in user_zones else 0) + (zone3_bad if 'REACTIVITE' in user_zones else 0) }}
+          </div>
           <div style="font-size:0.7rem; color:#dc2626; margin-top:4px; font-weight:500;">Hors cible</div>
         </div>
       </div>
@@ -167,23 +216,26 @@
   <div class="alerts-card" style="background:white; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
     <div style="padding:0.75rem 1.1rem; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between;">
       <div style="font-size:0.87rem; font-weight:600; color:#111827;">Alertes actives</div>
-      {% if zone1_warn > 0 or zone1_bad > 0 %}
+      {% set total_alerts = (zone1_warn + zone1_bad if 'RTCH' in user_zones else 0) + (zone2_warn + zone2_bad if 'CONTROLE' in user_zones else 0) + (zone3_warn + zone3_bad if 'REACTIVITE' in user_zones else 0) %}
+      {% if total_alerts > 0 %}
       <span style="font-size:0.68rem; padding:0.15rem 0.5rem; border-radius:10px; background:#fef2f2; color:#dc2626; font-weight:600;">
-        {{ zone1_warn + zone1_bad }} alerte(s)
+        {{ total_alerts }} alerte(s)
       </span>
       {% endif %}
     </div>
-    <div style="padding:0.5rem 0;">
+    <div style="padding:0.5rem 0; max-height:250px; overflow-y:auto;">
+
+      {% if 'RTCH' in user_zones %}
       {% for kpi in zone1_kpis %}
         {% if kpi.status != 'good' %}
-        <div style="display:flex; align-items:center; gap:0.75rem; padding:0.6rem 1.1rem; border-bottom:1px solid #f9fafb;">
+        <div style="display:flex; align-items:center; gap:0.75rem; padding:0.5rem 1.1rem; border-bottom:1px solid #f9fafb;">
           <div style="width:8px; height:8px; border-radius:50%; flex-shrink:0;
                background:{% if kpi.status == 'warn' %}#d97706{% else %}#dc2626{% endif %};"></div>
           <div style="flex:1;">
-            <div style="font-size:0.8rem; font-weight:600; color:#111827;">{{ kpi.name }}</div>
-            <div style="font-size:0.7rem; color:#6b7280;">Valeur: {{ kpi.value }} — Cible: {{ kpi.target }}</div>
+            <div style="font-size:0.75rem; font-weight:600; color:#111827;">{{ kpi.label }}</div>
+            <div style="font-size:0.65rem; color:#9ca3af;">RTCH · {{ kpi.value }}</div>
           </div>
-          <span style="font-size:0.68rem; padding:0.15rem 0.5rem; border-radius:4px; font-weight:600;
+          <span style="font-size:0.65rem; padding:0.12rem 0.4rem; border-radius:4px; font-weight:600;
                background:{% if kpi.status == 'warn' %}#fffbeb{% else %}#fef2f2{% endif %};
                color:{% if kpi.status == 'warn' %}#d97706{% else %}#dc2626{% endif %};">
             {% if kpi.status == 'warn' %}Alerte{% else %}Hors cible{% endif %}
@@ -191,7 +243,49 @@
         </div>
         {% endif %}
       {% endfor %}
-      {% if zone1_good == zone1_kpis|length %}
+      {% endif %}
+
+      {% if 'CONTROLE' in user_zones %}
+      {% for kpi in zone2_kpis %}
+        {% if kpi.status != 'good' %}
+        <div style="display:flex; align-items:center; gap:0.75rem; padding:0.5rem 1.1rem; border-bottom:1px solid #f9fafb;">
+          <div style="width:8px; height:8px; border-radius:50%; flex-shrink:0;
+               background:{% if kpi.status == 'warn' %}#d97706{% else %}#dc2626{% endif %};"></div>
+          <div style="flex:1;">
+            <div style="font-size:0.75rem; font-weight:600; color:#111827;">{{ kpi.label }}</div>
+            <div style="font-size:0.65rem; color:#9ca3af;">Contrôle · {{ kpi.value }}</div>
+          </div>
+          <span style="font-size:0.65rem; padding:0.12rem 0.4rem; border-radius:4px; font-weight:600;
+               background:{% if kpi.status == 'warn' %}#fffbeb{% else %}#fef2f2{% endif %};
+               color:{% if kpi.status == 'warn' %}#d97706{% else %}#dc2626{% endif %};">
+            {% if kpi.status == 'warn' %}Alerte{% else %}Hors cible{% endif %}
+          </span>
+        </div>
+        {% endif %}
+      {% endfor %}
+      {% endif %}
+
+      {% if 'REACTIVITE' in user_zones %}
+      {% for kpi in zone3_kpis %}
+        {% if kpi.status != 'good' %}
+        <div style="display:flex; align-items:center; gap:0.75rem; padding:0.5rem 1.1rem; border-bottom:1px solid #f9fafb;">
+          <div style="width:8px; height:8px; border-radius:50%; flex-shrink:0;
+               background:{% if kpi.status == 'warn' %}#d97706{% else %}#dc2626{% endif %};"></div>
+          <div style="flex:1;">
+            <div style="font-size:0.75rem; font-weight:600; color:#111827;">{{ kpi.label }}</div>
+            <div style="font-size:0.65rem; color:#9ca3af;">Réactivité · {{ kpi.value }}</div>
+          </div>
+          <span style="font-size:0.65rem; padding:0.12rem 0.4rem; border-radius:4px; font-weight:600;
+               background:{% if kpi.status == 'warn' %}#fffbeb{% else %}#fef2f2{% endif %};
+               color:{% if kpi.status == 'warn' %}#d97706{% else %}#dc2626{% endif %};">
+            {% if kpi.status == 'warn' %}Alerte{% else %}Hors cible{% endif %}
+          </span>
+        </div>
+        {% endif %}
+      {% endfor %}
+      {% endif %}
+
+      {% if total_alerts == 0 %}
       <div style="padding:1.5rem; text-align:center; color:#16a34a; font-size:0.82rem; font-weight:500;">
         ✅ Tous les KPIs sont dans la cible
       </div>
@@ -202,35 +296,20 @@
 </div>
 
 <style>
-  /* Light mode */
   .zone-card, .chart-card, .summary-card-home, .alerts-card { background: white; }
-
-  /* Dark mode */
   body.dark-mode .zone-card,
   body.dark-mode .chart-card,
   body.dark-mode .summary-card-home,
-  body.dark-mode .alerts-card {
-    background: #1e293b !important;
-    border-color: #334155 !important;
-  }
+  body.dark-mode .alerts-card { background: #1e293b !important; border-color: #334155 !important; }
   body.dark-mode .zone-card div[style*="color:#374151"],
-  body.dark-mode .zone-card div[style*="color:#111827"] {
-    color: #cbd5e1 !important;
-  }
-  body.dark-mode .zone-card div[style*="border-bottom:1px solid #f3f4f6"] {
-    border-color: #334155 !important;
-  }
-  body.dark-mode .alerts-card div[style*="border-bottom:1px solid #f9fafb"] {
-    border-color: #334155 !important;
-  }
+  body.dark-mode .zone-card div[style*="color:#111827"] { color: #cbd5e1 !important; }
+  body.dark-mode .zone-card div[style*="border-bottom:1px solid #f3f4f6"] { border-color: #334155 !important; }
+  body.dark-mode .alerts-card div[style*="border-bottom:1px solid #f9fafb"] { border-color: #334155 !important; }
   body.dark-mode .alerts-card div[style*="color:#111827"] { color: #f1f5f9 !important; }
   body.dark-mode .alerts-card div[style*="color:#6b7280"] { color: #94a3b8 !important; }
-  body.dark-mode .summary-card-home div[style*="border-bottom:1px solid #e5e7eb"] {
-    border-color: #334155 !important;
-  }
+  body.dark-mode .summary-card-home div[style*="border-bottom:1px solid #e5e7eb"] { border-color: #334155 !important; }
   body.dark-mode .chart-card div[style*="color:#111827"] { color: #f1f5f9 !important; }
   body.dark-mode .chart-card div[style*="color:#6b7280"] { color: #94a3b8 !important; }
-
   @media (max-width: 768px) {
     div[style*="repeat(3,1fr)"] { grid-template-columns: 1fr !important; }
     div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
@@ -238,73 +317,53 @@
 </style>
 
 <script>
-  fetch('/dashboard/zone1/comparison/')
-    .then(r => r.json())
-    .then(data => {
-      const colors = data.statuses.map(s =>
-        s === 'good' ? 'rgba(22,163,74,0.8)' :
-        s === 'warn' ? 'rgba(217,119,6,0.8)' :
-        'rgba(220,38,38,0.8)'
-      );
-      const borders = data.statuses.map(s =>
-        s === 'good' ? '#16a34a' :
-        s === 'warn' ? '#d97706' : '#dc2626'
-      );
-      const ctx = document.getElementById('comparison-chart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: data.labels,
-          datasets: [
-            {
-              label: 'Valeur actuelle',
-              data: data.values,
-              backgroundColor: colors,
-              borderColor: borders,
-              borderWidth: 2,
-              borderRadius: 6,
-            },
-            {
-              label: 'Seuil critique (1.0)',
-              data: data.labels.map(() => data.threshold),
-              type: 'line',
-              borderColor: '#dc2626',
-              borderWidth: 2,
-              borderDash: [6, 4],
-              pointRadius: 0,
-              fill: false,
-            },
-            {
-              label: 'Seuil alerte (0.5)',
-              data: data.labels.map(() => data.warning),
-              type: 'line',
-              borderColor: '#d97706',
-              borderWidth: 2,
-              borderDash: [6, 4],
-              pointRadius: 0,
-              fill: false,
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: { font: { family: 'DM Sans', size: 11 }, usePointStyle: true }
-            },
-            tooltip: {
-              callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)}` }
-            }
+  function buildChart(canvasId, url) {
+    const el = document.getElementById(canvasId);
+    if (!el) return;
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        const colors = data.statuses.map(s =>
+          s === 'good' ? 'rgba(22,163,74,0.8)' :
+          s === 'warn' ? 'rgba(217,119,6,0.8)' :
+          'rgba(220,38,38,0.8)'
+        );
+        const borders = data.statuses.map(s =>
+          s === 'good' ? '#16a34a' :
+          s === 'warn' ? '#d97706' : '#dc2626'
+        );
+        const ctx = el.getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: data.labels,
+            datasets: [
+              { label: 'Valeur actuelle', data: data.values, backgroundColor: colors, borderColor: borders, borderWidth: 1.5, borderRadius: 4 },
+              { label: 'Seuil critique', data: data.labels.map(() => data.threshold), type: 'line', borderColor: '#dc2626', borderWidth: 1.5, borderDash: [4, 3], pointRadius: 0, fill: false },
+              { label: 'Seuil alerte', data: data.labels.map(() => data.warning), type: 'line', borderColor: '#d97706', borderWidth: 1.5, borderDash: [4, 3], pointRadius: 0, fill: false }
+            ]
           },
-          scales: {
-            x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 12, weight: '600' } } },
-            y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { font: { family: 'DM Sans', size: 11 } } }
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)}` } } },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 8 }, maxRotation: 45 } },
+              y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { font: { family: 'DM Sans', size: 9 } } }
+            }
           }
-        }
+        });
       });
-    });
+  }
+
+  {% if 'RTCH' in user_zones %}
+  buildChart('chart-rtch', '/dashboard/zone1/comparison/?zone=RTCH');
+  {% endif %}
+  {% if 'CONTROLE' in user_zones %}
+  buildChart('chart-controle', '/dashboard/zone2/comparison/?zone=CONTROLE');
+  {% endif %}
+  {% if 'REACTIVITE' in user_zones %}
+  buildChart('chart-reactivite', '/dashboard/zone3/comparison/?zone=REACTIVITE');
+  {% endif %}
 </script>
 
 {% endblock %}
