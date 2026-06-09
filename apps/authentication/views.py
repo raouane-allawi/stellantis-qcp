@@ -54,7 +54,7 @@ def logout_view(request):
             ip_address=request.META.get('REMOTE_ADDR'),
         )
     logout(request)
-    return redirect('authentication:login')
+    return redirect('auth:login')
 
 
 def password_reset_view(request):

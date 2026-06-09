@@ -34,6 +34,7 @@
   <span style="font-size:0.68rem; color:#9ca3af; margin-left:auto;" id="last-update-text">
     Mise à jour: {{ last_update }}
   </span>
+  {% if request.user.role != 'OPERATOR' %}
   <a href="/dashboard/zone2/export/csv/?zone=CONTROLE"
      style="display:flex; align-items:center; gap:0.4rem; padding:0.35rem 0.8rem; background:white; color:#374151; border:1px solid #e5e7eb; border-radius:6px; font-size:0.75rem; font-weight:500; text-decoration:none;"
      onmouseover="this.style.borderColor='#16a34a'; this.style.color='#16a34a';"
@@ -46,6 +47,7 @@
      onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#374151';">
     📗 Excel
   </a>
+  {% endif %}
   <button hx-get="/dashboard/zone2/kpis/"
           hx-target="#kpi-container"
           hx-swap="innerHTML"
